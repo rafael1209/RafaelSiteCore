@@ -29,7 +29,7 @@ namespace RafaelSiteCore.Controllers
                         if (user.DiscordId == 0)
                                 return BadRequest("Discord Auth Error");
 
-                        _discordAuthLogic.ReturnUserData(user);
+                        user = _discordAuthLogic.ReturnUserData(user);
 
                         var userJsonData = new
                         {
