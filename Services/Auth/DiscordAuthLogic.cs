@@ -1,5 +1,6 @@
-﻿using RafaelSiteCore.DataWrapper.Authorize;
-using RafaelSiteCore.Model.User;
+﻿using MongoDB.Bson;
+using RafaelSiteCore.DataWrapper.Authorize;
+using RafaelSiteCore.Model.Users;
 
 namespace RafaelSiteCore.Services.Auth
 {
@@ -25,6 +26,11 @@ namespace RafaelSiteCore.Services.Auth
                         user.AvatarHash = avatarHash;
 
                         return user;
+                }
+
+                public User IsUserExist(ObjectId AuthToken)
+                {
+                        return _mongoDbContext.GetAuthenticatedUser(AuthToken);
                 }
         }
 }

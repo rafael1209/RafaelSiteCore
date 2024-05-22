@@ -1,4 +1,4 @@
-﻿using RafaelSiteCore.Model.User;
+﻿using RafaelSiteCore.Model.Users;
 using x3rt.DiscordOAuth2;
 using x3rt.DiscordOAuth2.Entities.Enums;
 

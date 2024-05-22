@@ -1,6 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
-using RafaelSiteCore.Model.User;
+using RafaelSiteCore.Model.Users;
 
 namespace RafaelSiteCore.DataWrapper.Authorize
 {
@@ -21,7 +21,14 @@ namespace RafaelSiteCore.DataWrapper.Authorize
 
                         this._mongoDatabase = _mongoClient.GetDatabase(databaseName);
 
-                        this._usersCollection = _mongoDatabase.GetCollection<User>(AuthorizeDbContext.ConstUsersCollection);
+                        this._usersCollection = _mongoDatabase.GetCollection<User>(ConstUsersCollection);
+                }
+
+                internal User GetAuthenticatedUser(ObjectId authToken)
+                {
+                        var filter = Builders<User>.Filter.Eq(u => u.Id, authToken);
+                        var user = _mongoDatabase.GetCollection<User>(ConstUsersCollection).Find(filter).FirstOrDefault();
+                        return user;
                 }
 
                 internal bool IsUserExist(ulong idDiscord)

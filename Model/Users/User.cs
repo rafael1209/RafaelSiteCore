@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using System.Text.Json.Serialization;
 
-namespace RafaelSiteCore.Model.User
+namespace RafaelSiteCore.Model.Users
 {
         public class User
         {

@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RafaelSiteCore.DataWrapper.Authorize;
 using RafaelSiteCore.Model.Authorize;
-using RafaelSiteCore.Model.User;
+using RafaelSiteCore.Model.Users;
 using RafaelSiteCore.Services.Auth;
 
-namespace RafaelSiteCore.Controllers
+namespace RafaelSiteCore.Controllers.Auth
 {
         [Route("api/[controller]")]
         [ApiController]
@@ -33,8 +33,8 @@ namespace RafaelSiteCore.Controllers
 
                         var userData = new
                         {
-                                Name = user.Name,
-                                Balance = user.Balance,
+                                user.Name,
+                                user.Balance,
                                 AvatarUrl = $"https://cdn.discordapp.com/avatars/{user.DiscordId}/{user.AvatarHash}.png",
                                 AuthToken = user.Id.ToString(),
                         };

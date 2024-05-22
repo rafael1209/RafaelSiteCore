@@ -17,4 +17,10 @@
     <PackageReference Include="x3rt.DiscordOAuth2" Version="1.0.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\Games\Clicker\" />
+    <Folder Include="Controllers\Works\" />
+    <Folder Include="Controllers\Pages\Main\" />
+  </ItemGroup>
+
 </Project>
