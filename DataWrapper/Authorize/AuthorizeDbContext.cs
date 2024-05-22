@@ -50,5 +50,14 @@ namespace RafaelSiteCore.DataWrapper.Authorize
 
                         return user;
                 }
+
+                internal void UpdateUserAvatarHash(ObjectId searchToken, string newAvatarHash)
+                {
+                        var filter = Builders<User>.Filter.Eq(u => u.Id, searchToken);
+
+                        var update = Builders<User>.Update.Set(u => u.AvatarHash, newAvatarHash);
+
+                        _usersCollection.UpdateOne(filter, update);
+                }
         }
 }

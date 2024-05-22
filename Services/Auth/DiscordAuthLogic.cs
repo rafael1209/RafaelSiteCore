@@ -12,12 +12,19 @@ namespace RafaelSiteCore.Services.Auth
                         _mongoDbContext = mongoDbContext;
                 }
 
-                public User ReturnUserData(User user)
+                public User ReturnUserData(User user, string avatarHash)
                 {
                         if (_mongoDbContext.IsUserExist(user.DiscordId))
-                                return _mongoDbContext.GetUserByIdDiscord(user.DiscordId);
+                                user = _mongoDbContext.GetUserByIdDiscord(user.DiscordId);
+                        else
+                                user = _mongoDbContext.AddAndReturnUser(user);
 
-                        return _mongoDbContext.AddAndReturnUser(user);
+                        if (user.AvatarHash != avatarHash) 
+                                _mongoDbContext.UpdateUserAvatarHash(user.Id, avatarHash);
+
+                        user.AvatarHash = avatarHash;
+
+                        return user;
                 }
         }
 }

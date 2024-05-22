@@ -14,8 +14,6 @@ namespace RafaelSiteCore.Model.User
 
                 public string Email { get; set; } = string.Empty;
 
-                public string AuthToken { get; set; } = string.Empty;
-
                 public double Balance { get; set; }
 
                 public string AvatarHash { get; set; } = string.Empty;
