@@ -10,7 +10,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RafaelSiteCore.Controllers.Blog
 {
-        [Route("api/[controller]")]
+        [Route("api/blog")]
         [ApiController]
         public class BlogController : Controller
         {
@@ -24,31 +24,57 @@ namespace RafaelSiteCore.Controllers.Blog
                         _authLogic = discordAuthLogic;
                 }
 
-                [HttpGet("GetAllPosts")]
+                [HttpGet]
                 public IActionResult GetAllPosts()
                 {
-
-
                         return Json(_blogLogic.GetAllPosts());
                 }
 
-                [HttpPost("CreatePost")]
-                public IActionResult CreatePost([FromBody] CreateBlogRequest BlogRequest)
+                [HttpPost]
+                public IActionResult CreatePost([FromHeader(Name = "AuthToken")] string authToken, [FromQuery] string title, [FromQuery] string text, [FromQuery] string image)
                 {
-                        var user = _authLogic.IsUserExist(ObjectId.Parse(BlogRequest.Credential.AuthToken));
+                        if (!ObjectId.TryParse(authToken, out ObjectId userId))
+                                return BadRequest("Invalid AuthToken format.");
+
+                        var user = _authLogic.IsUserExist(ObjectId.Parse(authToken));
 
                         if (user == null)
                                 return Unauthorized();
 
-                        _blogLogic.AddPost(BlogRequest.Title, BlogRequest.body, BlogRequest.ImgUrl, user);
+                        _blogLogic.AddPost(title, text, image, user);
 
                         return Ok();
                 }
 
-                [HttpPost("LikePost")]
-                public IActionResult LikePost([FromBody] UserCredential credential, string postId)
+                [HttpPut("blog/{postId}/like")]
+                public IActionResult LikePost([FromHeader(Name = "AuthToken")] string authToken, string postId)
                 {
-                        var user = _authLogic.IsUserExist(ObjectId.Parse(credential.AuthToken));
+                        if (!ObjectId.TryParse(authToken, out ObjectId userId))
+                                return BadRequest("Invalid AuthToken format.");
+
+                        if (!ObjectId.TryParse(postId, out ObjectId postObjectId))
+                                return BadRequest("Invalid PostId format.");
+
+                        var user = _authLogic.IsUserExist(ObjectId.Parse(authToken));
+
+                        if (user == null)
+                                return Unauthorized();
+
+                        _blogLogic.LikePost(user, ObjectId.Parse(postId));
+
+                        return Ok();
+                }
+
+                [HttpDelete("blog/{postId}/like")]
+                public IActionResult UnlikePost([FromHeader(Name = "AuthToken")] string authToken, [FromRoute] string postId)
+                {
+                        if (!ObjectId.TryParse(authToken, out ObjectId userId))
+                                return BadRequest("Invalid AuthToken format.");
+
+                        if (!ObjectId.TryParse(postId, out ObjectId postObjectId))
+                                return BadRequest("Invalid PostId format.");
+
+                        var user = _authLogic.IsUserExist(ObjectId.Parse(authToken));
 
                         if (user == null)
                                 return Unauthorized();

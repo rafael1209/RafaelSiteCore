@@ -9,7 +9,7 @@ namespace RafaelSiteCore.Model.Blog
                 [JsonPropertyName("SearchToken")]
                 public ObjectId Id { get; set; }
 
-                public Author author { get; set; } = new Author();
+                public Account Author { get; set; } = new Account();
 
                 public string Title { get; set; } = string.Empty;
 

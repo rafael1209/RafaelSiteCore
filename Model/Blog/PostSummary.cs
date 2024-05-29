@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using RafaelSiteCore.Model.Users;
 
 namespace RafaelSiteCore.Model.Blog
 {
@@ -6,7 +7,7 @@ namespace RafaelSiteCore.Model.Blog
         {
                 public string PostId { get; set; } = string.Empty;
 
-                public string Author { get; set; } = string.Empty;
+                public Account Author { get; set; } = new Account();
 
                 public string Title { get; set; } = string.Empty;
 

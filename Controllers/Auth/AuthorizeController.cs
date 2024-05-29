@@ -6,7 +6,7 @@ using RafaelSiteCore.Services.Auth;
 
 namespace RafaelSiteCore.Controllers.Auth
 {
-        [Route("api/[controller]")]
+        [Route("api/auth")]
         [ApiController]
         public class AuthorizeController : Controller
         {
@@ -21,7 +21,7 @@ namespace RafaelSiteCore.Controllers.Auth
                         _discordAuthLogic = discordAuthLogic;
                 }
 
-                [HttpPost("DiscordLogin")]
+                [HttpPost("discord")]
                 public IActionResult DiscordLogin([FromBody] DiscordAuthRequest discordAuth)
                 {
                         User user = _discordApiClient.GetUserInfo(discordAuth.Code);
@@ -38,6 +38,7 @@ namespace RafaelSiteCore.Controllers.Auth
                                 AvatarUrl = $"https://cdn.discordapp.com/avatars/{user.DiscordId}/{user.AvatarHash}.png",
                                 AuthToken = user.Id.ToString(),
                         };
+
                         return Json(userData);
                 }
         }

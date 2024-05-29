@@ -66,5 +66,22 @@ namespace RafaelSiteCore.DataWrapper.Authorize
 
                         _usersCollection.UpdateOne(filter, update);
                 }
+
+                internal Account GetAccountByIdDiscord(ulong idDiscord)
+                {
+                        Account account = new Account();
+
+                        var filter = Builders<User>.Filter.Eq(u => u.DiscordId, idDiscord);
+
+                        var user = _usersCollection.Find(filter).FirstOrDefault();
+
+                        account.DiscordId = user.DiscordId;
+
+                        account.Name = user.Name;
+
+                        account.AvatarUrl = $"https://cdn.discordapp.com/avatars/{user.DiscordId}/{user.AvatarHash}.png";
+
+                        return account;
+                }
         }
 }

@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using RafaelSiteCore.DataWrapper.Authorize;
 using RafaelSiteCore.DataWrapper.Blog;
 using RafaelSiteCore.Model.Blog;
 using RafaelSiteCore.Model.Users;
@@ -9,9 +10,13 @@ namespace RafaelSiteCore.Services.Blog
         {
                 private BlogDbContext _dbContext;
 
-                public BlogLogic(BlogDbContext dbContext)
+                private AuthorizeDbContext _authorizeDbContext;
+
+                public BlogLogic(BlogDbContext dbContext,AuthorizeDbContext authorizeDbContext)
                 {
                         _dbContext = dbContext;
+
+                        _authorizeDbContext = authorizeDbContext;
                 }
 
                 public List<PostSummary> GetAllPosts()
@@ -27,6 +32,11 @@ namespace RafaelSiteCore.Services.Blog
                 public void LikePost(User user,ObjectId postId)
                 {
                         _dbContext.LikePost(user, postId);
+                }
+
+                public Account GetAccount(ulong discordId)
+                {
+                        return _authorizeDbContext.GetAccountByIdDiscord(discordId);
                 }
         }
 }

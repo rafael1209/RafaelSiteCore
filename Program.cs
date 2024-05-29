@@ -11,48 +11,17 @@ namespace RafaelSiteCore
         {
                 public static void Main(string[] args)
                 {
-                        var builder = WebApplication.CreateBuilder(args);
+                        CreateHostBuilder()
+                                .Build()
+                                .Run();
+                }
 
-                        string mongoDbConnectionString = builder.Configuration.GetConnectionString("MongoDbConnectionString") ?? throw new ArgumentNullException("MongoDbConnectionString", "MongoDB connection string is not configured.");
-                        string mongoDbName = builder.Configuration.GetConnectionString("MongoDbName") ?? throw new ArgumentNullException("MongoDbName", "MongoDB database name is not configured.");                  
-
-                        builder.Services.AddControllers();
-                        builder.Services.AddEndpointsApiExplorer();
-                        builder.Services.AddSwaggerGen();
-
-                        builder.Services.AddSingleton<DiscordApiClient>();
-                        builder.Services.AddSingleton<DiscordAuthLogic>();
-                        builder.Services.AddSingleton<BlogLogic>();
-
-                        _ = builder.Services.AddSingleton<AuthorizeDbContext>(sp =>
-                              new AuthorizeDbContext(mongoDbConnectionString, mongoDbName));
-                        _ = builder.Services.AddSingleton<BlogDbContext>(sp =>
-                              new BlogDbContext(mongoDbConnectionString, mongoDbName));
-
-                        var app = builder.Build();
-
-                        if (app.Environment.IsDevelopment())
-                        {
-
-                        }
-
-                        app.UseSwagger();
-                        app.UseSwaggerUI();
-                        //==============
-
-                        app.UseCors(builder =>
-                        {
-                                builder.AllowAnyOrigin()
-                                       .AllowAnyMethod()
-                                       .AllowAnyHeader();
+                private static IHostBuilder CreateHostBuilder()
+                {
+                        return Host.CreateDefaultBuilder()
+                        .ConfigureWebHostDefaults(webHost => {
+                                webHost.UseStartup<Startup>();
                         });
-
-                        app.UseAuthorization();
-
-
-                        app.MapControllers();
-
-                        app.Run();
                 }
         }
 }

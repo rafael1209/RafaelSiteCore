@@ -4,6 +4,8 @@ using MongoDB.Driver.Core.Configuration;
 using RafaelSiteCore.DataWrapper.Authorize;
 using RafaelSiteCore.Model.Blog;
 using RafaelSiteCore.Model.Users;
+using RafaelSiteCore.Services.Blog;
+using System.Security.Principal;
 
 namespace RafaelSiteCore.DataWrapper.Blog
 {
@@ -31,13 +33,13 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         var projection = Builders<Post>.Projection.Expression(p => new PostSummary
                         {
                                 PostId = p.Id.ToString(),
-                                Author = p.author.Name,
+                                Author = p.Author,
                                 Title = p.Title,
                                 Body = p.body,
                                 Imgurl = p.ImgUrl,
                                 Likes = p.Likes.Count,
                                 CretaedAtUtc = p.CreatedDateUtc
-                        });
+                        });;
 
                         var allPosts = _blogCollection.Find(FilterDefinition<Post>.Empty)
                                 .Project(projection)
@@ -53,8 +55,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         post.Title = title;
                         post.body = body;
                         post.ImgUrl = ImgUrl;
-                        post.author.Name = user.Name;
-                        post.author.DiscordId = user.DiscordId;
+                        post.Author = new Account() { AvatarUrl = user.AvatarHash, Name = user.Name, DiscordId = user.DiscordId };
                         post.CreatedDateUtc = DateTime.UtcNow;
 
                         _blogCollection.InsertOne(post);
