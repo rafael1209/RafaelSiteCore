@@ -27,9 +27,9 @@ namespace RafaelSiteCore
                                 .AddJsonFile("appsettings.json", optional: true)
                                 .Build();
 
-                        clientId = configuration.GetValue<string>("Discord:ClientId");
-                        clientSecret = configuration.GetValue<string>("Discord:ClientSecret");
-                        redirectUrl = configuration.GetValue<string>("Discord:RedirectUrl");
+                        clientId = configuration.GetValue<string>("ClientId");
+                        clientSecret = configuration.GetValue<string>("ClientSecret");
+                        redirectUrl = configuration.GetValue<string>("RedirectUrl");
                         connectionString = configuration.GetValue<string>("ConnectionStrings:MongoDbConnectionString");
                         mongoDbName = configuration.GetValue<string>("ConnectionStrings:MongoDbName");
                 }
