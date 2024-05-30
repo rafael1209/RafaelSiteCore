@@ -47,13 +47,13 @@ namespace RafaelSiteCore.Controllers.Auth
                                         return BadRequest("Discord Auth Error");
                                 }
 
-                                user = _discordAuthLogic.ReturnUserData(user, user.AvatarHash);
+                                user = _discordAuthLogic.ReturnUserData(user, user.AvatarUrl);
 
                                 var userData = new
                                 {
                                         user.Name,
                                         user.Balance,
-                                        AvatarUrl = $"https://cdn.discordapp.com/avatars/{user.DiscordId}/{user.AvatarHash}.png",
+                                        AvatarUrl = $"{user.AvatarUrl}",
                                         AuthToken = user.Id.ToString(),
                                 };
 

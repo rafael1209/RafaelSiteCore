@@ -37,7 +37,7 @@ namespace RafaelSiteCore.Services.Auth
                                         user.DiscordId = userDiscord.Id;
                                         user.Name = userDiscord.Username;
                                         if (userDiscord.Avatar != null)
-                                                user.AvatarHash = userDiscord.Avatar;
+                                                user.AvatarUrl = $"https://cdn.discordapp.com/avatars/{user.DiscordId}/{userDiscord.Avatar}.png";
                                 }
                         }
 

@@ -20,10 +20,10 @@ namespace RafaelSiteCore.Services.Auth
                         else
                                 user = _mongoDbContext.AddAndReturnUser(user);
 
-                        if (user.AvatarHash != avatarHash) 
+                        if (user.AvatarUrl != avatarHash) 
                                 _mongoDbContext.UpdateUserAvatarHash(user.Id, avatarHash);
 
-                        user.AvatarHash = avatarHash;
+                        user.AvatarUrl = avatarHash;
 
                         return user;
                 }

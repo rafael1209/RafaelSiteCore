@@ -62,7 +62,7 @@ namespace RafaelSiteCore.DataWrapper.Authorize
                 {
                         var filter = Builders<User>.Filter.Eq(u => u.Id, searchToken);
 
-                        var update = Builders<User>.Update.Set(u => u.AvatarHash, newAvatarHash);
+                        var update = Builders<User>.Update.Set(u => u.AvatarUrl, newAvatarHash);
 
                         _usersCollection.UpdateOne(filter, update);
                 }
@@ -79,7 +79,7 @@ namespace RafaelSiteCore.DataWrapper.Authorize
 
                         account.Name = user.Name;
 
-                        account.AvatarUrl = $"https://cdn.discordapp.com/avatars/{user.DiscordId}/{user.AvatarHash}.png";
+                        account.AvatarUrl = $"{user.AvatarUrl}";
 
                         return account;
                 }

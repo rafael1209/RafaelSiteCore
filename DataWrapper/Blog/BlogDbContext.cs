@@ -39,7 +39,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                 Imgurl = p.ImgUrl,
                                 Likes = p.Likes.Count,
                                 CretaedAtUtc = p.CreatedDateUtc
-                        });;
+                        }); ;
 
                         var allPosts = _blogCollection.Find(FilterDefinition<Post>.Empty)
                                 .Project(projection)
@@ -55,7 +55,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         post.Title = title;
                         post.body = body;
                         post.ImgUrl = ImgUrl;
-                        post.Author = new Account() { AvatarUrl = user.AvatarHash, Name = user.Name, DiscordId = user.DiscordId };
+                        post.Author = new Account() { AvatarUrl = user.AvatarUrl, Name = user.Name, DiscordId = user.DiscordId };
                         post.CreatedDateUtc = DateTime.UtcNow;
 
                         _blogCollection.InsertOne(post);
@@ -63,21 +63,32 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                 public void LikePost(User user, ObjectId postId)
                 {
-                        var filter = Builders<Post>.Filter.And(
-                            Builders<Post>.Filter.Eq(p => p.Id, postId),
-                            Builders<Post>.Filter.ElemMatch(p => p.Likes, u => u.Id == user.Id)
-                        );
-
-                        var update = Builders<Post>.Update.PullFilter(p => p.Likes, Builders<User>.Filter.Eq(u => u.Id, user.Id));
-
-                        var result = _blogCollection.UpdateOne(filter, update);
-
-                        if (result.ModifiedCount == 0)
+                        Account account = new Account()
                         {
-                                var addToSetUpdate = Builders<Post>.Update.AddToSet(p => p.Likes, user);
-                                _blogCollection.UpdateOne(Builders<Post>.Filter.Eq(p => p.Id, postId), addToSetUpdate);
-                        }
+                                AvatarUrl = user.AvatarUrl,
+                                Name = user.Name,
+                                DiscordId = user.DiscordId,
+                        };
+
+                        var filter = Builders<Post>.Filter.Eq(p => p.Id, postId);
+                        var update = Builders<Post>.Update.AddToSet(p => p.Likes, account);
+
+                        _blogCollection.UpdateOne(filter, update);
                 }
 
+                public void UnlikePost(User user, ObjectId postId)
+                {
+                        Account account = new Account()
+                        {
+                                AvatarUrl = user.AvatarUrl,
+                                Name = user.Name,
+                                DiscordId = user.DiscordId,
+                        };
+
+                        var filter = Builders<Post>.Filter.Eq(p => p.Id, postId);
+                        var update = Builders<Post>.Update.Pull(p => p.Likes, account);
+
+                        _blogCollection.UpdateOne(filter, update);
+                }
         }
 }

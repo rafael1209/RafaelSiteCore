@@ -16,7 +16,7 @@ namespace RafaelSiteCore.Model.Users
 
                 public double Balance { get; set; }
 
-                public string AvatarHash { get; set; } = string.Empty;
+                public string AvatarUrl { get; set; } = string.Empty;
 
                 public DateTime LastLoginUtc { get; set; }
 

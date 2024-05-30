@@ -79,7 +79,7 @@ namespace RafaelSiteCore.Controllers.Blog
                         if (user == null)
                                 return Unauthorized();
 
-                        _blogLogic.LikePost(user, ObjectId.Parse(postId));
+                        _blogLogic.UnlikePost(user, ObjectId.Parse(postId));
 
                         return Ok();
                 }

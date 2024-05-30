@@ -17,7 +17,7 @@ namespace RafaelSiteCore.Model.Blog
 
                 public string ImgUrl { get; set; } = string.Empty;
 
-                public List<User> Likes { get; set; } = new List<User>();
+                public List<Account> Likes { get; set; } = new List<Account>();
 
                 public DateTime CreatedDateUtc { get; set; }
         }
