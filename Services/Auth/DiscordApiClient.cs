@@ -10,11 +10,11 @@ namespace RafaelSiteCore.Services.Auth
                 private readonly string _clientSecret;
                 private readonly string _redirectUrl;
 
-                public DiscordApiClient(string clientId, string clientSecret, string redirectUrl)
+                public DiscordApiClient(ulong clientId, string clientSecret, string redirectUrl)
                 {
-                        this._clientID = 1242498004070432908; //ulong.Parse(clientId);
-                        this._clientSecret = "OcrEABaN00NIWtePmBfjnAS_Co4Iy7i8"; //clientSecret;
-                        this._redirectUrl = "https://rafaelchasman.ru/"; //redirectUrl;
+                        this._clientID = /*1242498004070432908;*/ clientId;
+                        this._clientSecret = /*"OcrEABaN00NIWtePmBfjnAS_Co4Iy7i8";*/ clientSecret;
+                        this._redirectUrl = /*"https://rafaelchasman.ru/"; */redirectUrl;
                 }
 
                 internal User GetUserInfo(string code)
