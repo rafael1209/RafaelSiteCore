@@ -58,7 +58,6 @@ namespace RafaelSiteCore
                                 app.UseHsts();
                         }
 
-
                         app.UseStaticFiles();
                         app.UseRouting();
                         app.UseAuthentication();

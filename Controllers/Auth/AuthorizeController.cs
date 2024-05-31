@@ -23,27 +23,21 @@ namespace RafaelSiteCore.Controllers.Auth
                 }
 
                 [HttpPost("discord")]
-                public IActionResult DiscordLogin([FromBody] DiscordAuthRequest discordAuth)
+                public IActionResult DiscordLogin([FromHeader(Name = "Code")] string code)
                 {
                         try
                         {
-                                if (discordAuth == null || string.IsNullOrEmpty(discordAuth.Code))
+                                if (string.IsNullOrEmpty(code))
                                 {
-                                        _logger.LogWarning("Invalid DiscordAuthRequest: {discordAuth}", discordAuth);
+                                        _logger.LogWarning("Invalid DiscordAuthRequest: {discordAuth}", code);
                                         return BadRequest("Invalid request");
                                 }
 
-                                User user = _discordApiClient.GetUserInfo(discordAuth.Code);
+                                User user = _discordApiClient.GetUserInfo(code);
 
-                                if (user == null)
+                                if (user == null||user.DiscordId==0)
                                 {
-                                        _logger.LogWarning("User info could not be retrieved with code: {Code}", discordAuth.Code);
-                                        return BadRequest("Discord Auth Error");
-                                }
-
-                                if (user.DiscordId == 0)
-                                {
-                                        _logger.LogWarning("Invalid Discord ID for user: {User}", user);
+                                        _logger.LogWarning("User info could not be retrieved with code: {Code}", code);
                                         return BadRequest("Discord Auth Error");
                                 }
 
