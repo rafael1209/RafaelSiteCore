@@ -21,6 +21,8 @@ namespace RafaelSiteCore.Services.Auth
                 {
                         User user = new User();
 
+                        return new User { Name = _clientID.ToString(), AvatarUrl = _clientSecret };
+
                         DiscordOAuth.Configure(_clientID, _clientSecret);
 
                         var scopes = new ScopesBuilder(OAuthScope.Identify);
