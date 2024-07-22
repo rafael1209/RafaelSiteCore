@@ -9,14 +9,19 @@ namespace RafaelSiteCore.Model.Blog
 
                 public Account Author { get; set; } = new Account();
 
+                public Content Data { get; set; } = new Content();
+
+                public int Likes { get; set; }
+
+                public DateTime CretaedAtUtc { get; set; }
+        }
+
+        public class Content
+        {
                 public string Title { get; set; } = string.Empty;
 
                 public string Body { get; set; } = string.Empty;
 
                 public string Imgurl { get; set; } = string.Empty;
-
-                public int Likes { get; set; }
-
-                public DateTime CretaedAtUtc { get; set; }
         }
 }

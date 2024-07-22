@@ -10,7 +10,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RafaelSiteCore.Controllers.Blog
 {
-        [Route("api/blog")]
+        [Route("api/blog/")]
         [ApiController]
         public class BlogController : Controller
         {
@@ -41,12 +41,12 @@ namespace RafaelSiteCore.Controllers.Blog
                         if (user == null)
                                 return Unauthorized();
 
-                        _blogLogic.AddPost(title, text, image, user);
+                        //_blogLogic.AddPost(title, text, image, user);
 
                         return Ok();
                 }
 
-                [HttpPut("blog/{postId}/like")]
+                [HttpPut("{postId}/like")]
                 public IActionResult LikePost([FromHeader(Name = "AuthToken")] string authToken, string postId)
                 {
                         if (!ObjectId.TryParse(authToken, out ObjectId userId))
@@ -65,7 +65,7 @@ namespace RafaelSiteCore.Controllers.Blog
                         return Ok();
                 }
 
-                [HttpDelete("blog/{postId}/like")]
+                [HttpDelete("{postId}/like")]
                 public IActionResult UnlikePost([FromHeader(Name = "AuthToken")] string authToken, [FromRoute] string postId)
                 {
                         if (!ObjectId.TryParse(authToken, out ObjectId userId))

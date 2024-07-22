@@ -17,7 +17,11 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                 private IMongoCollection<Post> _blogCollection;
 
+                private IMongoCollection<User> _userCollection;
+
                 private const string ConstPostsCollection = "Posts";
+
+                private const string ConstUsersCollection = "Users";
 
                 public BlogDbContext(string connectionString, string databaseName)
                 {
@@ -26,40 +30,68 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         this._mongoDatabase = _mongoClient.GetDatabase(databaseName);
 
                         this._blogCollection = _mongoDatabase.GetCollection<Post>(ConstPostsCollection);
+
+                        this._userCollection = _mongoDatabase.GetCollection<User>(ConstUsersCollection);
                 }
 
                 public List<PostSummary> GetPosts()
                 {
-                        var projection = Builders<Post>.Projection.Expression(p => new PostSummary
+                        var projection = Builders<Post>.Projection.Expression(p => new
                         {
                                 PostId = p.Id.ToString(),
-                                Author = p.Author,
-                                Title = p.Title,
-                                Body = p.body,
-                                Imgurl = p.ImgUrl,
+                                AuthorDiscordId = p.Author.DiscordId,
+                                Data = new Content { Title = p.Title, Body = p.Body, Imgurl = p.ImgUrl },
                                 Likes = p.Likes.Count,
-                                CretaedAtUtc = p.CreatedDateUtc
-                        }); ;
+                                CreatedAtUtc = p.CreatedDateUtc
+                        });
 
-                        var allPosts = _blogCollection.Find(FilterDefinition<Post>.Empty)
-                                .Project(projection)
-                                .ToList();
+                        var allPostsIntermediate = _blogCollection.Find(FilterDefinition<Post>.Empty)
+                            .Project(projection)
+                            .ToList();
+
+                        var allPosts = allPostsIntermediate.Select(p => new PostSummary
+                        {
+                                PostId = p.PostId,
+                                Author = GetAccountByDiscordID(p.AuthorDiscordId),
+                                Data = p.Data,
+                                Likes = p.Likes,
+                                CretaedAtUtc = p.CreatedAtUtc
+                        }).ToList();
 
                         return allPosts;
                 }
 
-                public void SavePost(string title, string body, string ImgUrl, User user)
+                public Account GetAccountByDiscordID(ulong discordID)
                 {
-                        Post post = new Post();
+                        var user = GetUserByIdDiscord(discordID);
 
-                        post.Title = title;
-                        post.body = body;
-                        post.ImgUrl = ImgUrl;
-                        post.Author = new Account() { AvatarUrl = user.AvatarUrl, Name = user.Name, DiscordId = user.DiscordId };
-                        post.CreatedDateUtc = DateTime.UtcNow;
-
-                        _blogCollection.InsertOne(post);
+                        return new Account()
+                        {
+                                DiscordId = discordID,
+                                AvatarUrl = user.AvatarUrl,
+                                Name = user.Name,
+                        };
                 }
+
+                internal User GetUserByIdDiscord(ulong idDiscord)
+                {
+                        var filter = Builders<User>.Filter.Eq(u => u.DiscordId, idDiscord);
+
+                        return _userCollection.Find(filter).FirstOrDefault();
+                }
+
+                //public void SavePost(string title, string body, string ImgUrl, User user)
+                //{
+                //        Post post = new Post();
+
+                //        post.Title = title;
+                //        post.body = body;
+                //        post.ImgUrl = ImgUrl;
+                //        post.Author = new Account() { AvatarUrl = user.AvatarUrl, Name = user.Name, DiscordId = user.DiscordId };
+                //        post.CreatedDateUtc = DateTime.UtcNow;
+
+                //        _blogCollection.InsertOne(post);
+                //}
 
                 public void LikePost(User user, ObjectId postId)
                 {

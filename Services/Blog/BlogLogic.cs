@@ -24,10 +24,10 @@ namespace RafaelSiteCore.Services.Blog
                         return _dbContext.GetPosts();
                 }
 
-                public void AddPost(string title, string body, string ImgUrl, User user)
-                {
-                        _dbContext.SavePost(title, body, ImgUrl, user);
-                }
+                //public void AddPost(string title, string body, string ImgUrl, User user)
+                //{
+                //        _dbContext.SavePost(title, body, ImgUrl, user);
+                //}
 
                 public void LikePost(User user,ObjectId postId)
                 {

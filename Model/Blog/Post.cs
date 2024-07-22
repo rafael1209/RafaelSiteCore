@@ -13,7 +13,7 @@ namespace RafaelSiteCore.Model.Blog
 
                 public string Title { get; set; } = string.Empty;
 
-                public string body { get; set; } = string.Empty;
+                public string Body { get; set; } = string.Empty;
 
                 public string ImgUrl { get; set; } = string.Empty;
 
