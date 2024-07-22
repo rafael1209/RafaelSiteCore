@@ -35,7 +35,7 @@ namespace RafaelSiteCore.Controllers.Auth
 
                                 User user = _discordApiClient.GetUserInfo(code);
 
-                                if (user == null||user.DiscordId==0)
+                                if (user == null || user.DiscordId == 0) 
                                 {
                                         _logger.LogWarning("User info could not be retrieved with code: {Code}", code);
                                         return BadRequest("Discord Auth Error");
