@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using RafaelSiteCore.DataWrapper.Authorize;
+using RafaelSiteCore.Middlewere;
 using RafaelSiteCore.Model.Authorize;
 using RafaelSiteCore.Model.Users;
 using RafaelSiteCore.Services.Auth;
@@ -28,16 +29,12 @@ namespace RafaelSiteCore.Controllers.Auth
                         try
                         {
                                 if (string.IsNullOrEmpty(code))
-                                {
-                                        _logger.LogWarning("Invalid DiscordAuthRequest: {discordAuth}", code);
                                         return BadRequest("Invalid request");
-                                }
 
-                                User user = _discordApiClient.GetUserInfo(code);
+                                User user = _discordApiClient.GetUserInfo(code!);
 
                                 if (user == null || user.DiscordId == 0) 
                                 {
-                                        _logger.LogWarning("User info could not be retrieved with code: {Code}", code);
                                         return BadRequest("Discord Auth Error");
                                 }
 
@@ -48,7 +45,7 @@ namespace RafaelSiteCore.Controllers.Auth
                                         user.Name,
                                         user.Balance,
                                         AvatarUrl = $"{user.AvatarUrl}",
-                                        AuthToken = user.Id.ToString(),
+                                        AuthToken = user.AuthToken,
                                 };
 
                                 _logger.LogInformation("User successfully authenticated: {UserData}", userData);

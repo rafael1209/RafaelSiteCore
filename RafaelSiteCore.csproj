@@ -19,8 +19,6 @@
 
   <ItemGroup>
     <Folder Include="Controllers\Games\Clicker\" />
-    <Folder Include="Controllers\Works\" />
-    <Folder Include="Controllers\Pages\Main\" />
   </ItemGroup>
 
 </Project>

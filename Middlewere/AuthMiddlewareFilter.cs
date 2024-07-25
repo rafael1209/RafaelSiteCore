@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
+using RafaelSiteCore.Services.Auth;
 
 namespace RafaelSiteCore.Middlewere
 {
@@ -11,10 +12,11 @@ namespace RafaelSiteCore.Middlewere
                 public IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
                 {
                         var httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
-                        return new AuthMiddlewareFilter(httpContextAccessor);
+                        var repository = serviceProvider.GetRequiredService<DiscordAuthLogic>();
+                        return new AuthMiddlewareFilter(httpContextAccessor,repository);
                 }
 
-                private class AuthMiddlewareFilter(IHttpContextAccessor httpContextAccessor) : IActionFilter
+                private class AuthMiddlewareFilter(IHttpContextAccessor httpContextAccessor, DiscordAuthLogic authLogic) : IActionFilter
                 {
                         public void OnActionExecuting(ActionExecutingContext context)
                         {
@@ -22,30 +24,30 @@ namespace RafaelSiteCore.Middlewere
                                 {
                                         var request = httpContextAccessor.HttpContext!.Request;
 
-                                        //if (IsUserAuthorizedByTokenFromHeader(request))
-                                        //        return;
+                                        if (IsUserAuthorizedByTokenFromHeader(request))
+                                                return;
 
                                         context.Result = new UnauthorizedResult();
                                 }
-                                catch (Exception e)
+                                catch (Exception)
                                 {
                                         context.Result = new UnauthorizedResult();
                                 }
                         }
 
-                        //private bool IsUserAuthorizedByTokenFromHeader(HttpRequest request)
-                        //{
-                        //        request.Headers.TryGetValue("Authorization", out var token);
+                        private bool IsUserAuthorizedByTokenFromHeader(HttpRequest request)
+                        {
+                                request.Headers.TryGetValue("Authorization", out var token);
 
-                        //        if (!string.IsNullOrEmpty(token))
-                        //        {
-                        //                repository.GetUserByAuthToken(token!);
+                                if (!string.IsNullOrEmpty(token))
+                                {
+                                        authLogic.IsUserExist(token!);
 
-                        //                return true;
-                        //        }
+                                        return true;
+                                }
 
-                        //        return false;
-                        //}
+                                return false;
+                        }
 
                         public void OnActionExecuted(ActionExecutedContext context)
                         {

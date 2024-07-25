@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using RafaelSiteCore.DataWrapper.Authorize;
+using RafaelSiteCore.Helpers;
 using RafaelSiteCore.Model.Users;
 
 namespace RafaelSiteCore.Services.Auth
@@ -18,7 +19,7 @@ namespace RafaelSiteCore.Services.Auth
                         if (_mongoDbContext.IsUserExist(user.DiscordId))
                                 user = _mongoDbContext.GetUserByIdDiscord(user.DiscordId);
                         else
-                                user = _mongoDbContext.AddAndReturnUser(user);
+                                user = _mongoDbContext.AddAndReturnUser(user, GenerateAuthToken(user.DiscordId));
 
                         if (user.AvatarUrl != avatarHash) 
                                 _mongoDbContext.UpdateUserAvatarHash(user.Id, avatarHash);
@@ -28,9 +29,20 @@ namespace RafaelSiteCore.Services.Auth
                         return user;
                 }
 
-                public User IsUserExist(ObjectId AuthToken)
+                public User IsUserExist(string AuthToken)
                 {
                         return _mongoDbContext.GetAuthenticatedUser(AuthToken);
+                }
+
+                public string GenerateAuthToken(ulong id)
+                {
+                        string salt = StringHelpers.GenerateRandomSalt();
+
+                        string idSalted = id + salt;
+
+                        string authToken = StringHelpers.GenerateHash(idSalted);
+
+                        return authToken;
                 }
         }
 }

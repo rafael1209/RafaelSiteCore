@@ -24,9 +24,9 @@ namespace RafaelSiteCore.DataWrapper.Authorize
                         this._usersCollection = _mongoDatabase.GetCollection<User>(ConstUsersCollection);
                 }
 
-                internal User GetAuthenticatedUser(ObjectId authToken)
+                internal User GetAuthenticatedUser(string authToken)
                 {
-                        var filter = Builders<User>.Filter.Eq(u => u.Id, authToken);
+                        var filter = Builders<User>.Filter.Eq(u => u.AuthToken, authToken);
                         var user = _mongoDatabase.GetCollection<User>(ConstUsersCollection).Find(filter).FirstOrDefault();
                         return user;
                 }
@@ -45,13 +45,15 @@ namespace RafaelSiteCore.DataWrapper.Authorize
                                 return _usersCollection.Find(filter).FirstOrDefault();
                 }
 
-                internal User AddAndReturnUser(User user)
+                internal User AddAndReturnUser(User user,string authToken)
                 {
                         user.Balance = 0;
 
                         user.LastLoginUtc = DateTime.UtcNow;
 
                         user.CreatedDateUtc = DateTime.UtcNow;
+
+                        user.AuthToken = authToken;
 
                         _usersCollection.InsertOne(user);
 
