@@ -11,7 +11,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RafaelSiteCore.Controllers.Blog
 {
-        [Route("api/blog/")]
+        [Route("api/v1/blog/")]
         [ApiController]
         public class BlogController : Controller
         {
@@ -40,7 +40,7 @@ namespace RafaelSiteCore.Controllers.Blog
                         if (!ObjectId.TryParse(token, out ObjectId userId))
                                 return BadRequest("Invalid AuthToken format.");
 
-                        var user = _authLogic.IsUserExist(token!);
+                        var user = _authLogic.GetUser(token!);
 
                         if (user == null)
                                 return Unauthorized();
@@ -58,7 +58,7 @@ namespace RafaelSiteCore.Controllers.Blog
                         if (!ObjectId.TryParse(postId, out ObjectId postObjectId))
                                 return BadRequest("Invalid PostId format.");
 
-                        var user = _authLogic.IsUserExist(token!);
+                        var user = _authLogic.GetUser(token!);
 
                         if (user == null)
                                 return Unauthorized();
@@ -76,7 +76,7 @@ namespace RafaelSiteCore.Controllers.Blog
                         if (!ObjectId.TryParse(postId, out ObjectId postObjectId))
                                 return BadRequest("Invalid PostId format.");
 
-                        var user = _authLogic.IsUserExist(token!);
+                        var user = _authLogic.GetUser(token!);
 
                         if (user == null)
                                 return Unauthorized();

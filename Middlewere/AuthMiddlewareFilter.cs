@@ -41,7 +41,7 @@ namespace RafaelSiteCore.Middlewere
 
                                 if (!string.IsNullOrEmpty(token))
                                 {
-                                        authLogic.IsUserExist(token!);
+                                        authLogic.GetUser(token!);
 
                                         return true;
                                 }

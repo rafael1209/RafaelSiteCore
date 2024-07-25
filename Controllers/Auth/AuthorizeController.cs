@@ -31,7 +31,7 @@ namespace RafaelSiteCore.Controllers.Auth
                                 if (string.IsNullOrEmpty(code))
                                         return BadRequest("Invalid request");
 
-                                User user = _discordApiClient.GetUserInfo(code!);
+                                Model.Users.User user = _discordApiClient.GetUserInfo(code!);
 
                                 if (user == null || user.DiscordId == 0) 
                                 {
