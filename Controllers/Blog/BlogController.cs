@@ -2,6 +2,7 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
 using RafaelSiteCore.DataWrapper.Blog;
+using RafaelSiteCore.Middlewere;
 using RafaelSiteCore.Model.Authorize;
 using RafaelSiteCore.Model.Blog;
 using RafaelSiteCore.Services.Auth;
@@ -25,6 +26,7 @@ namespace RafaelSiteCore.Controllers.Blog
                 }
 
                 [HttpGet]
+                [AuthMiddleware]
                 public IActionResult GetAllPosts()
                 {
                         return Json(_blogLogic.GetAllPosts());

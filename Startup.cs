@@ -7,6 +7,7 @@ using RafaelSiteCore.Services.Auth;
 using RafaelSiteCore.Services.Blog;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
+using Microsoft.OpenApi.Models;
 
 namespace RafaelSiteCore
 {
@@ -38,8 +39,35 @@ namespace RafaelSiteCore
                 {
                         services.AddControllers();
                         services.AddEndpointsApiExplorer();
-                        services.AddSwaggerGen();
-                    
+                        services.AddSwaggerGen(options =>
+                        {
+                                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                                {
+                                        Name = "Authorization",
+                                        Description = "Enter the Bearer Authorization string as following: `Bearer Generated-JWT-Token`",
+                                        In = ParameterLocation.Header,
+                                        Type = SecuritySchemeType.ApiKey,
+                                        Scheme = "Bearer"
+                                });
+
+                                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Name = "Bearer",
+                            In = ParameterLocation.Header,
+                            Reference = new OpenApiReference
+                            {
+                                Id = "Bearer",
+                                Type = ReferenceType.SecurityScheme
+                            }
+                        },
+                        new List<string>()
+                    }
+                });
+                        });
+                        services.AddHttpContextAccessor();
                         services.AddSingleton<DiscordApiClient>(sp =>
                               new DiscordApiClient(clientId ?? 0, clientSecret ?? "", redirectUrl ?? ""));
                         services.AddSingleton<DiscordAuthLogic>();
