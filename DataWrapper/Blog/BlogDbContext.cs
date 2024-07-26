@@ -42,16 +42,23 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         {
                                 Id = post.Id.ToString(),
                                 Text = post.Text,
-                                Imgurl = post.Imgurl,
+                                ImgUrl = post.ImgUrl,
                                 CreatedAtUtc = post.CretaedAtUtc,
                                 UpdatedAtUtc = post.UpdatedAtUtc,
                                 Account = post.Account,
-                                Comments = post.Comments,
+                                Comments = post.Comments.Select(comment => new CommantViewModel
+                                {
+                                        Id = comment.Id.ToString(),
+                                        Text = comment.Text,
+                                        CreatedAtUtc = comment.CreatedAtUtc,
+                                        Account = comment.Account,
+                                }).ToList(),
                                 Likes = post.Likes.Count(),
                         }).ToList();
 
                         return postViewModels;
                 }
+
 
 
                 public Account GetAccountByDiscordID(ulong discordID)
@@ -78,7 +85,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         Post post = new Post();
 
                         post.Text = text;
-                        post.Imgurl = imgUrl;
+                        post.ImgUrl = imgUrl;
                         post.CretaedAtUtc = DateTime.UtcNow;
                         post.UpdatedAtUtc = DateTime.UtcNow;
                         post.Account = new Account() { SearchToken = user.Id.ToString(), Username = user.Name, AvatarUrl = user.AvatarUrl };
@@ -97,6 +104,22 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                         var filter = Builders<Post>.Filter.Eq(p => p.Id, postId);
                         var update = Builders<Post>.Update.AddToSet(p => p.Likes, account);
+
+                        _blogCollection.UpdateOne(filter, update);
+                }
+
+                public void AddUserTableToComments(User user, string postId,string text)
+                {
+                        Comment comment = new Comment()
+                        {
+                                Id = ObjectId.GenerateNewId(),  
+                                Text = text,
+                                Account = new Account() { SearchToken = user.Id.ToString(), AvatarUrl = user.AvatarUrl, Username = user.Name },
+                                CreatedAtUtc = DateTime.UtcNow,
+                        };
+
+                        var filter = Builders<Post>.Filter.Eq(p => p.Id, ObjectId.Parse(postId));
+                        var update = Builders<Post>.Update.AddToSet(p => p.Comments, comment);
 
                         _blogCollection.UpdateOne(filter, update);
                 }

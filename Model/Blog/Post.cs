@@ -10,7 +10,7 @@ namespace RafaelSiteCore.Model.Blog
 
                 public string Text { get; set; } = string.Empty;
 
-                public string Imgurl { get; set; } = string.Empty;
+                public string ImgUrl { get; set; } = string.Empty;
 
                 public DateTime CretaedAtUtc { get; set; }
 

@@ -25,10 +25,24 @@ namespace RafaelSiteCore.Controllers.Blog
                         _authLogic = discordAuthLogic;
                 }
 
-                [HttpGet]             
+                [HttpGet]
+                [AuthMiddleware]
                 public IActionResult GetAllPosts()
                 {
                         return Json(_blogLogic.GetAllPosts());
+                }
+
+                [HttpPost("{postId}/comment")]
+                [AuthMiddleware]
+                public IActionResult AddComment([FromRoute] string postId,CommentRequest request)
+                {
+                        Request.Headers.TryGetValue("Authorization", out var token);
+
+                        var user = _authLogic.GetUser(token!);
+
+                        _blogLogic.AddComment(user, postId, request.comment);
+
+                        return Ok();
                 }
 
                 [HttpPost]
@@ -45,7 +59,7 @@ namespace RafaelSiteCore.Controllers.Blog
                 }
 
                 [HttpPut("{postId}/like")]
-                public IActionResult LikePost(string postId)
+                public IActionResult LikePost([FromRoute] string postId)
                 {
                         Request.Headers.TryGetValue("Authorization", out var token);
 

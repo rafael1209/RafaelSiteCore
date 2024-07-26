@@ -24,6 +24,12 @@ namespace RafaelSiteCore.Services.Blog
                         return _dbContext.GetPosts();
                 }
 
+                public void AddComment(User user,string postId, string comment)
+                {
+                        _dbContext.AddUserTableToComments(user, postId, comment);
+                }
+
+
                 public void AddPost(string title, string ImgUrl, User user)
                 {
                         _dbContext.SavePost(title, ImgUrl, user);
