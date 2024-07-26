@@ -19,15 +19,15 @@ namespace RafaelSiteCore.Services.Blog
                         _authorizeDbContext = authorizeDbContext;
                 }
 
-                public List<PostSummary> GetAllPosts()
+                public List<PostViewModel> GetAllPosts()
                 {
                         return _dbContext.GetPosts();
                 }
 
-                //public void AddPost(string title, string body, string ImgUrl, User user)
-                //{
-                //        _dbContext.SavePost(title, body, ImgUrl, user);
-                //}
+                public void AddPost(string title, string ImgUrl, User user)
+                {
+                        _dbContext.SavePost(title, ImgUrl, user);
+                }
 
                 public void LikePost(User user,ObjectId postId)
                 {

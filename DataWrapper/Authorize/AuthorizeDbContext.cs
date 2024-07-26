@@ -77,9 +77,9 @@ namespace RafaelSiteCore.DataWrapper.Authorize
 
                         var user = _usersCollection.Find(filter).FirstOrDefault();
 
-                        account.DiscordId = user.DiscordId;
+                        account.SearchToken = user.Id.ToString();
 
-                        account.Name = user.Name;
+                        account.Username = user.Name;
 
                         account.AvatarUrl = $"{user.AvatarUrl}";
 

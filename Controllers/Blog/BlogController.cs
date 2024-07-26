@@ -33,19 +33,13 @@ namespace RafaelSiteCore.Controllers.Blog
 
                 [HttpPost]
                 [AuthMiddleware]
-                public IActionResult CreatePost([FromQuery] string title, [FromQuery] string text, [FromQuery] string image)
+                public IActionResult CreatePost(CreateBlogRequest createBlogRequest)
                 {
-                        Request.Headers.TryGetValue("AuthToken", out var token);
-
-                        if (!ObjectId.TryParse(token, out ObjectId userId))
-                                return BadRequest("Invalid AuthToken format.");
+                        Request.Headers.TryGetValue("Authorization", out var token);
 
                         var user = _authLogic.GetUser(token!);
 
-                        if (user == null)
-                                return Unauthorized();
-
-                        //_blogLogic.AddPost(title, text, image, user);
+                        _blogLogic.AddPost(createBlogRequest.Text, createBlogRequest.ImgUrl, user);
 
                         return Ok();
                 }
@@ -84,6 +78,12 @@ namespace RafaelSiteCore.Controllers.Blog
                         _blogLogic.UnlikePost(user, ObjectId.Parse(postId));
 
                         return Ok();
+                }
+
+                [HttpGet("profile/")]
+                public IActionResult GetUserProfile()
+                {
+                        return Json(_blogLogic.GetAllPosts());
                 }
         }
 }

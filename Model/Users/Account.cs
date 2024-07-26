@@ -1,10 +1,12 @@
-﻿namespace RafaelSiteCore.Model.Users
+﻿using MongoDB.Bson;
+
+namespace RafaelSiteCore.Model.Users
 {
         public class Account
         {
-                public ulong DiscordId { get; set; }
+                public string SearchToken { get; set; } = string.Empty;
 
-                public string Name { get; set; } = string.Empty;
+                public string Username { get; set; } = string.Empty;
 
                 public string AvatarUrl { get; set; } = string.Empty;
         }

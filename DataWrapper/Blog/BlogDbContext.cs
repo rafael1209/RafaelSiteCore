@@ -34,32 +34,25 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         this._userCollection = _mongoDatabase.GetCollection<User>(ConstUsersCollection);
                 }
 
-                public List<PostSummary> GetPosts()
+                public List<PostViewModel> GetPosts()
                 {
-                        var projection = Builders<Post>.Projection.Expression(p => new
-                        {
-                                PostId = p.Id.ToString(),
-                                AuthorDiscordId = p.Author.DiscordId,
-                                Data = new Content { Title = p.Title, Body = p.Body, Imgurl = p.ImgUrl },
-                                Likes = p.Likes.Count,
-                                CreatedAtUtc = p.CreatedDateUtc
-                        });
+                        var posts = _blogCollection.Find(post => true).ToList();
 
-                        var allPostsIntermediate = _blogCollection.Find(FilterDefinition<Post>.Empty)
-                            .Project(projection)
-                            .ToList();
-
-                        var allPosts = allPostsIntermediate.Select(p => new PostSummary
+                        var postViewModels = posts.Select(post => new PostViewModel
                         {
-                                PostId = p.PostId,
-                                Author = GetAccountByDiscordID(p.AuthorDiscordId),
-                                Data = p.Data,
-                                Likes = p.Likes,
-                                CretaedAtUtc = p.CreatedAtUtc
+                                Id = post.Id.ToString(),
+                                Text = post.Text,
+                                Imgurl = post.Imgurl,
+                                CreatedAtUtc = post.CretaedAtUtc,
+                                UpdatedAtUtc = post.UpdatedAtUtc,
+                                Account = post.Account,
+                                Comments = post.Comments,
+                                Likes = post.Likes.Count(),
                         }).ToList();
 
-                        return allPosts;
+                        return postViewModels;
                 }
+
 
                 public Account GetAccountByDiscordID(ulong discordID)
                 {
@@ -67,9 +60,9 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                         return new Account()
                         {
-                                DiscordId = discordID,
+                                SearchToken = user.Id.ToString(),
                                 AvatarUrl = user.AvatarUrl,
-                                Name = user.Name,
+                                Username = user.Name,
                         };
                 }
 
@@ -80,26 +73,26 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         return _userCollection.Find(filter).FirstOrDefault();
                 }
 
-                //public void SavePost(string title, string body, string ImgUrl, User user)
-                //{
-                //        Post post = new Post();
+                public void SavePost(string text, string imgUrl, User user)
+                {
+                        Post post = new Post();
 
-                //        post.Title = title;
-                //        post.body = body;
-                //        post.ImgUrl = ImgUrl;
-                //        post.Author = new Account() { AvatarUrl = user.AvatarUrl, Name = user.Name, DiscordId = user.DiscordId };
-                //        post.CreatedDateUtc = DateTime.UtcNow;
+                        post.Text = text;
+                        post.Imgurl = imgUrl;
+                        post.CretaedAtUtc = DateTime.UtcNow;
+                        post.UpdatedAtUtc = DateTime.UtcNow;
+                        post.Account = new Account() { SearchToken = user.Id.ToString(), Username = user.Name, AvatarUrl = user.AvatarUrl };
 
-                //        _blogCollection.InsertOne(post);
-                //}
+                        _blogCollection.InsertOne(post);
+                }
 
                 public void LikePost(User user, ObjectId postId)
                 {
                         Account account = new Account()
                         {
+                                SearchToken= user.Id.ToString(),
                                 AvatarUrl = user.AvatarUrl,
-                                Name = user.Name,
-                                DiscordId = user.DiscordId,
+                                Username = user.Name
                         };
 
                         var filter = Builders<Post>.Filter.Eq(p => p.Id, postId);
@@ -112,9 +105,9 @@ namespace RafaelSiteCore.DataWrapper.Blog
                 {
                         Account account = new Account()
                         {
+                                SearchToken = user.Id.ToString(),
                                 AvatarUrl = user.AvatarUrl,
-                                Name = user.Name,
-                                DiscordId = user.DiscordId,
+                                Username = user.Name
                         };
 
                         var filter = Builders<Post>.Filter.Eq(p => p.Id, postId);
