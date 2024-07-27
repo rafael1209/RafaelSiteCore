@@ -13,6 +13,6 @@ namespace RafaelSiteCore.Model.Blog
 
                 public DateTime CreatedAtUtc { get; set; }
 
-                public Account Account { get; set; } = new Account();
+                public ObjectId AuthorSearchToken { get; set; }
         }
 }

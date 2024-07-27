@@ -16,7 +16,7 @@ namespace RafaelSiteCore.Model.Blog
 
                 public DateTime UpdatedAtUtc { get; set; }
 
-                public Account Account { get; set; } = new Account();
+                public ObjectId AuthorSearchToken { get; set; }
 
                 public List<Comment> Comments { get; set; } = new List<Comment>();
 

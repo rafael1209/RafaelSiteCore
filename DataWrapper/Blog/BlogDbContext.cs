@@ -45,13 +45,13 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                 ImgUrl = post.ImgUrl,
                                 CreatedAtUtc = post.CretaedAtUtc,
                                 UpdatedAtUtc = post.UpdatedAtUtc,
-                                Account = post.Account,
+                                Account = GetAccountBySearchToken(post.AuthorSearchToken),
                                 Comments = post.Comments.Select(comment => new CommantViewModel
                                 {
                                         Id = comment.Id.ToString(),
                                         Text = comment.Text,
                                         CreatedAtUtc = comment.CreatedAtUtc,
-                                        Account = comment.Account,
+                                        Account = GetAccountBySearchToken(comment.AuthorSearchToken),
                                 }).ToList(),
                                 Likes = post.Likes.Count(),
                         }).ToList();
@@ -73,9 +73,28 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         };
                 }
 
+                public Account GetAccountBySearchToken(ObjectId token)
+                {
+                        var user = GetUserBySearchToken(token);
+
+                        return new Account()
+                        {
+                                SearchToken = user.Id.ToString(),
+                                AvatarUrl = user.AvatarUrl,
+                                Username = user.Name,
+                        };
+                }
+
                 internal User GetUserByIdDiscord(ulong idDiscord)
                 {
                         var filter = Builders<User>.Filter.Eq(u => u.DiscordId, idDiscord);
+
+                        return _userCollection.Find(filter).FirstOrDefault();
+                }
+
+                internal User GetUserBySearchToken(ObjectId searchToken)
+                {
+                        var filter = Builders<User>.Filter.Eq(u => u.Id, searchToken);
 
                         return _userCollection.Find(filter).FirstOrDefault();
                 }
@@ -88,7 +107,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         post.ImgUrl = imgUrl;
                         post.CretaedAtUtc = DateTime.UtcNow;
                         post.UpdatedAtUtc = DateTime.UtcNow;
-                        post.Account = new Account() { SearchToken = user.Id.ToString(), Username = user.Name, AvatarUrl = user.AvatarUrl };
+                        post.AuthorSearchToken = user.Id;
 
                         _blogCollection.InsertOne(post);
                 }
@@ -114,7 +133,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         {
                                 Id = ObjectId.GenerateNewId(),  
                                 Text = text,
-                                Account = new Account() { SearchToken = user.Id.ToString(), AvatarUrl = user.AvatarUrl, Username = user.Name },
+                                AuthorSearchToken = user.Id,
                                 CreatedAtUtc = DateTime.UtcNow,
                         };
 
