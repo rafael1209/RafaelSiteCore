@@ -36,7 +36,9 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                 public List<PostViewModel> GetPosts()
                 {
-                        var posts = _blogCollection.Find(post => true).ToList();
+                        var posts = _blogCollection.Find(post => true)
+                                               .SortByDescending(post => post.CretaedAtUtc)
+                                               .ToList();
 
                         var postViewModels = posts.Select(post => new PostViewModel
                         {
@@ -58,8 +60,6 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                         return postViewModels;
                 }
-
-
 
                 public Account GetAccountByDiscordID(ulong discordID)
                 {
