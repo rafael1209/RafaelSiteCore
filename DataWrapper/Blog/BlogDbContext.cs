@@ -32,47 +32,73 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         this._userCollection = _mongoDatabase.GetCollection<Model.Users.User>(ConstUsersCollection);
                 }
 
-                public ProfileView GetUserProfile(string name)
+                public List<Post> GetUserPosts(ObjectId id)
                 {
-                        var user = GetUserByUsername(name);
-
                         var posts = _blogCollection
-                                .Find(post => post.AuthorSearchToken == user.Id)
+                                .Find(post => post.AuthorSearchToken == id)
                                                                         .SortByDescending(post => post.CretaedAtUtc)
                                                                         .ToList();
+                        return posts;
+                }
 
+                public List<PostView> GetUserPostView(List<Post> posts, Account account)
+                {
                         var userPostView = posts.AsParallel()
                                 .Select(post => new PostView
-                        {
-                                Id = post.Id.ToString(),
-                                Text = post.Text,
-                                ImgUrl = post.ImgUrl,
-                                CreatedAtUtc = post.CretaedAtUtc,
-                                UpdatedAtUtc = post.UpdatedAtUtc,
-                                Account = GetAccountBySearchToken(post.AuthorSearchToken),
-                                Comments = post.Comments.AsParallel()
-                                        .Select(comment => new CommantViewModel
                                 {
-                                        Id = comment.Id.ToString(),
-                                        Text = comment.Text,
-                                        CreatedAtUtc = comment.CreatedAtUtc,
-                                        Account = GetAccountBySearchToken(comment.AuthorSearchToken),
-                                }).ToList(),
-                                Likes = post.Likes.Count(),
-                        }).ToList();
+                                        Id = post.Id.ToString(),
+                                        Text = post.Text,
+                                        ImgUrl = post.ImgUrl,
+                                        CreatedAtUtc = post.CretaedAtUtc,
+                                        UpdatedAtUtc = post.UpdatedAtUtc,
+                                        Account = account,
+                                        Comments = post.Comments.AsParallel()
+                                        .Select(comment => new CommantViewModel
+                                        {
+                                                Id = comment.Id.ToString(),
+                                                Text = comment.Text,
+                                                CreatedAtUtc = comment.CreatedAtUtc,
+                                                Account = GetAccountBySearchToken(comment.AuthorSearchToken),
+                                        }).ToList(),
+                                        Likes = post.Likes.Count(),
+                                }).ToList();
 
+                        return userPostView;
+                }
+
+                public ProfileView GetUserProfileView(List<PostView> userPosts,Account account,User user,bool IsFollowed)
+                {
                         var userProfile = new ProfileView()
                         {
-                                Account = GetAccountBySearchToken(user.Id),
+                                Account = account,
                                 IsBanned = user.IsBanned,
                                 Followers = user.Followers.Count(),
                                 Following = user.Following.Count(),
-                                IsFollowed = false,
+                                IsFollowed = IsFollowed,
                                 CreatedAtUtc = user.CreatedDateUtc,
-                                Posts = userPostView,
+                                Posts = userPosts
                         };
 
                         return userProfile;
+                }
+
+                public ProfileView GetUserProfile(string name, string authToken)
+                {
+                        var requestOwner = GetUserByAuthToken(authToken);
+
+                        var user = GetUserByUsername(name);
+
+                        var userAccount = GetAccountBySearchToken(user.Id);
+
+                        var userPosts = GetUserPosts(user.Id);
+
+                        var userPostView = GetUserPostView(userPosts, userAccount);
+
+                        bool isFollowed = requestOwner.Following.Contains(user.Id);
+
+                        var userProfileModel = GetUserProfileView(userPostView, userAccount, user, isFollowed);
+
+                        return userProfileModel;
                 }
                 public List<PostView> GetPosts()
                 {
@@ -139,6 +165,13 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         return _userCollection.Find(filter).FirstOrDefault();
                 }
 
+                public User GetUserByAuthToken(string authToken)
+                {
+                        var filter = Builders<User>.Filter.Eq(u => u.AuthToken, authToken);
+
+                        return _userCollection.Find(filter).FirstOrDefault();
+                }
+
                 public Model.Users.User GetUserByUsername(string name)
                 {
                         var filter = Builders<User>.Filter.Eq(u => u.Name, name);
@@ -172,6 +205,26 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         var update = Builders<Post>.Update.AddToSet(p => p.Likes, account);
 
                         _blogCollection.UpdateOne(filter, update);
+                }
+
+                public void FollowUser(User me,string name)
+                {
+                        var user = GetUserByUsername(name);
+
+                        AddObjectIdToUserFollow(me, user);
+                }
+                public void AddObjectIdToUserFollow(User me, User user)
+                {
+                        var filter = Builders<User>.Filter.Eq(p => p.Id, user.Id);
+                        var update = Builders<User>.Update
+                                .AddToSet(p => p.Followers, me.Id);
+
+                        var userFilter = Builders<User>.Filter.Eq(p => p.Id, me.Id);
+                        var userUpdate = Builders<User>.Update
+                                .AddToSet(p => p.Following, user.Id);
+
+                        _userCollection.UpdateOne(filter, update);
+                        _userCollection.UpdateOne(userFilter, userUpdate);
                 }
 
                 public void AddUserTableToComments(User user, string postId, string text)

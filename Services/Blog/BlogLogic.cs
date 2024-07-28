@@ -26,9 +26,9 @@ namespace RafaelSiteCore.Services.Blog
                         _authorizeDbContext = authorizeDbContext;
                 }
 
-                public ProfileView GetUserProfile(string name)
+                public ProfileView GetUserProfile(string name, string authToken)
                 {
-                        return _dbContext.GetUserProfile(name);
+                        return _dbContext.GetUserProfile(name, authToken);
                 }
 
                 public List<PostView> GetPosts()
@@ -41,6 +41,10 @@ namespace RafaelSiteCore.Services.Blog
                         _dbContext.AddUserTableToComments(user, postId, comment);
                 }
 
+                public void AddFollow(User user,string username)
+                {
+                        _dbContext.FollowUser(user, username);
+                }
 
                 public async Task AddPostAsync(string title, IFormFile file, User user)
                 {

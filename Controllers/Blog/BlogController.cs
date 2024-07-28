@@ -45,6 +45,19 @@ namespace RafaelSiteCore.Controllers.Blog
                         return Ok();
                 }
 
+                [HttpPost("{username}/follow")]
+                [AuthMiddleware]
+                public IActionResult AddComment([FromRoute] string username)
+                {
+                        Request.Headers.TryGetValue("Authorization", out var token);
+
+                        var user = _authLogic.GetUser(token!);
+
+                        _blogLogic.AddFollow(user, username);
+
+                        return Ok();
+                }
+
                 [HttpPost]
                 [AuthMiddleware]
                 public IActionResult CreatePost(CreateBlogRequest createBlogRequest)
@@ -87,9 +100,6 @@ namespace RafaelSiteCore.Controllers.Blog
 
                         var user = _authLogic.GetUser(token!);
 
-                        if (user == null)
-                                return Unauthorized();
-
                         _blogLogic.UnlikePost(user, ObjectId.Parse(postId));
 
                         return Ok();
@@ -99,7 +109,9 @@ namespace RafaelSiteCore.Controllers.Blog
                 [AuthMiddleware]
                 public IActionResult GetUserProfile([FromRoute] string name)
                 {
-                        return Json(_blogLogic.GetUserProfile(name));
+                        Request.Headers.TryGetValue("Authorization", out var authToken);
+
+                        return Json(_blogLogic.GetUserProfile(name, authToken!));
                 }
         }
 }
