@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 namespace RafaelSiteCore.Model.Blog
 {
-        public class PostViewModel
+        public class PostView
         {
                 [JsonPropertyName("SearchToken")]
                 public string Id { get; set; } = string.Empty;

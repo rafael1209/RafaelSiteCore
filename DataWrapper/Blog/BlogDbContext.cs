@@ -1,11 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Core.Configuration;
-using RafaelSiteCore.DataWrapper.Authorize;
 using RafaelSiteCore.Model.Blog;
 using RafaelSiteCore.Model.Users;
-using RafaelSiteCore.Services.Blog;
-using System.Security.Principal;
 
 namespace RafaelSiteCore.DataWrapper.Blog
 {
@@ -19,7 +15,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                 private IMongoCollection<Post> _blogCollection;
 
-                private IMongoCollection<User> _userCollection;
+                private IMongoCollection<Model.Users.User> _userCollection;
 
                 private const string ConstPostsCollection = "Posts";
 
@@ -33,16 +29,58 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                         this._blogCollection = _mongoDatabase.GetCollection<Post>(ConstPostsCollection);
 
-                        this._userCollection = _mongoDatabase.GetCollection<User>(ConstUsersCollection);
+                        this._userCollection = _mongoDatabase.GetCollection<Model.Users.User>(ConstUsersCollection);
                 }
 
-                public List<PostViewModel> GetPosts()
+                public ProfileView GetUserProfile(string name)
+                {
+                        var user = GetUserByUsername(name);
+
+                        var posts = _blogCollection
+                                .Find(post => post.AuthorSearchToken == user.Id)
+                                                                        .SortByDescending(post => post.CretaedAtUtc)
+                                                                        .ToList();
+
+                        var userPostView = posts.AsParallel()
+                                .Select(post => new PostView
+                        {
+                                Id = post.Id.ToString(),
+                                Text = post.Text,
+                                ImgUrl = post.ImgUrl,
+                                CreatedAtUtc = post.CretaedAtUtc,
+                                UpdatedAtUtc = post.UpdatedAtUtc,
+                                Account = GetAccountBySearchToken(post.AuthorSearchToken),
+                                Comments = post.Comments.AsParallel()
+                                        .Select(comment => new CommantViewModel
+                                {
+                                        Id = comment.Id.ToString(),
+                                        Text = comment.Text,
+                                        CreatedAtUtc = comment.CreatedAtUtc,
+                                        Account = GetAccountBySearchToken(comment.AuthorSearchToken),
+                                }).ToList(),
+                                Likes = post.Likes.Count(),
+                        }).ToList();
+
+                        var userProfile = new ProfileView()
+                        {
+                                Account = GetAccountBySearchToken(user.Id),
+                                IsBanned = user.IsBanned,
+                                Followers = user.Followers.Count(),
+                                Following = user.Following.Count(),
+                                IsFollowed = false,
+                                CreatedAtUtc = user.CreatedDateUtc,
+                                Posts = userPostView,
+                        };
+
+                        return userProfile;
+                }
+                public List<PostView> GetPosts()
                 {
                         var posts = _blogCollection.Find(post => true)
                                                .SortByDescending(post => post.CretaedAtUtc)
                                                .ToList();
 
-                        var postViewModels = posts.Select(post => new PostViewModel
+                        var postViewModels = posts.Select(post => new PostView
                         {
                                 Id = post.Id.ToString(),
                                 Text = post.Text,
@@ -101,6 +139,13 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         return _userCollection.Find(filter).FirstOrDefault();
                 }
 
+                public Model.Users.User GetUserByUsername(string name)
+                {
+                        var filter = Builders<User>.Filter.Eq(u => u.Name, name);
+
+                        return _userCollection.Find(filter).FirstOrDefault();
+                }
+
                 public void SavePost(string text, string fileUrl, User user)
                 {
                         Post post = new Post();
@@ -118,7 +163,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                 {
                         Account account = new Account()
                         {
-                                SearchToken= user.Id.ToString(),
+                                SearchToken = user.Id.ToString(),
                                 AvatarUrl = user.AvatarUrl,
                                 Username = user.Name
                         };
@@ -129,11 +174,11 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         _blogCollection.UpdateOne(filter, update);
                 }
 
-                public void AddUserTableToComments(User user, string postId,string text)
+                public void AddUserTableToComments(User user, string postId, string text)
                 {
                         Comment comment = new Comment()
                         {
-                                Id = ObjectId.GenerateNewId(),  
+                                Id = ObjectId.GenerateNewId(),
                                 Text = text,
                                 AuthorSearchToken = user.Id,
                                 CreatedAtUtc = DateTime.UtcNow,

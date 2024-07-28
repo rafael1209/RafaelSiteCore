@@ -26,7 +26,12 @@ namespace RafaelSiteCore.Services.Blog
                         _authorizeDbContext = authorizeDbContext;
                 }
 
-                public List<PostViewModel> GetAllPosts()
+                public ProfileView GetUserProfile(string name)
+                {
+                        return _dbContext.GetUserProfile(name);
+                }
+
+                public List<PostView> GetPosts()
                 {
                         return _dbContext.GetPosts();
                 }

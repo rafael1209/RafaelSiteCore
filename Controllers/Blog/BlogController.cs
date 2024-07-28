@@ -29,7 +29,7 @@ namespace RafaelSiteCore.Controllers.Blog
                 [AuthMiddleware]
                 public IActionResult GetAllPosts()
                 {
-                        return Json(_blogLogic.GetAllPosts());
+                        return Json(_blogLogic.GetPosts());
                 }
 
                 [HttpPost("{postId}/comment")]
@@ -77,6 +77,7 @@ namespace RafaelSiteCore.Controllers.Blog
                 }
 
                 [HttpDelete("{postId}/like")]
+                [AuthMiddleware]
                 public IActionResult UnlikePost([FromRoute] string postId)
                 {
                         Request.Headers.TryGetValue("Authorization", out var token);
@@ -94,10 +95,11 @@ namespace RafaelSiteCore.Controllers.Blog
                         return Ok();
                 }
 
-                [HttpGet("profile/")]
-                public IActionResult GetUserProfile()
+                [HttpGet("profile/{name}")]
+                [AuthMiddleware]
+                public IActionResult GetUserProfile([FromRoute] string name)
                 {
-                        return Json(_blogLogic.GetAllPosts());
+                        return Json(_blogLogic.GetUserProfile(name));
                 }
         }
 }
