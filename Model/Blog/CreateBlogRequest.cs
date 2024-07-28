@@ -8,6 +8,6 @@ namespace RafaelSiteCore.Model.Blog
         {
                 public required string Text { get; set; }
 
-                public required IFormFile file { get; set; }
+                public IFormFile? File { get; set; }
         }
 }

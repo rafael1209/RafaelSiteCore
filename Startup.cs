@@ -39,7 +39,20 @@ namespace RafaelSiteCore
                         connectionString = configuration.GetValue<string>("ConnectionStrings:MongoDbConnectionString");
                         mongoDbName = configuration.GetValue<string>("ConnectionStrings:MongoDbName");
                         googleDriveFolderId = configuration.GetValue<string>("GoogleDrive:FolderId");
-                        googleDriveCredentials = configuration.GetSection("installed").Get<GoogleDriveCredentials>();
+                        googleDriveCredentials = new GoogleDriveCredentials
+                        {
+                                Type = configuration.GetValue<string>("GoogleDrive:Type"),
+                                ProjectId = configuration.GetValue<string>("GoogleDrive:ProjectId"),
+                                PrivateKeyId = configuration.GetValue<string>("GoogleDrive:PrivateKeyId"),
+                                PrivateKey = configuration.GetValue<string>("GoogleDrive:PrivateKey"),
+                                ClientEmail = configuration.GetValue<string>("GoogleDrive:ClientEmail"),
+                                ClientId = configuration.GetValue<string>("GoogleDrive:ClientId"),
+                                AuthUri = configuration.GetValue<string>("GoogleDrive:AuthUri"),
+                                TokenUri = configuration.GetValue<string>("GoogleDrive:TokenUri"),
+                                AuthProviderX509CertUrl = configuration.GetValue<string>("GoogleDrive:AuthProviderX509CertUrl"),
+                                ClientX509CertUrl = configuration.GetValue<string>("GoogleDrive:ClientX509CertUrl"),
+                                UniverseDomain = configuration.GetValue<string>("GoogleDrive:UniverseDomain")
+                        };
                 }
 
                 public void ConfigureServices(IServiceCollection services)
@@ -85,8 +98,6 @@ namespace RafaelSiteCore
                               new GoogleDriveService(googleDriveCredentials ?? new GoogleDriveCredentials { }, googleDriveFolderId ?? ""));
                         services.AddSingleton<BlogDbContext>(sp =>
                               new BlogDbContext(connectionString ?? "", mongoDbName ?? ""));
-                        //services.AddSingleton<GoogleDriveService>(sp =>
-                        //        new GoogleDriveService(googleDriveCredentials ?? new GoogleDriveCredentials { }, googleDriveFolderId ?? ""));
 
 
                 }

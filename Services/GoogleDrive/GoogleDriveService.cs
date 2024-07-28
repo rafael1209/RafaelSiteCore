@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using RafaelSiteCore.Model.GoogleDriveCredentials;
 using System.Text;
 using RafaelSiteCore.Interfaces;
+using Google.Apis.Upload;
+using SharpCompress.Common;
 
 namespace RafaelSiteCore.Services.GoogleDrive
 {
@@ -16,37 +18,38 @@ namespace RafaelSiteCore.Services.GoogleDrive
 
                 public GoogleDriveService(GoogleDriveCredentials googleDriveCredential, string driveolderId)
                 {
-                        UserCredential credential;
 
                         _googleDriveFolderId = driveolderId;
 
                         try
                         {
-                                string credentialsJson = $@"{{
-                                        'installed': {{
-                                                'client_id': '{googleDriveCredential.ClientId}',
-                                                'project_id': '{googleDriveCredential.ProjectId}',
-                                                'auth_uri': '{googleDriveCredential.AuthUri}',
-                                                'token_uri': '{googleDriveCredential.TokenUri}',
-                                                'auth_provider_x509_cert_url': '{googleDriveCredential.AuthProvider}',
-                                                'client_secret': '{googleDriveCredential.ClientSecret}',
-                                                'redirect_uris': '{googleDriveCredential.RedirectUri}'
-                                        }}
+                                string jsonString = $@"
+                                {{
+                                        ""type"": ""{googleDriveCredential.Type}"",
+                                        ""project_id"": ""{googleDriveCredential.ProjectId}"",
+                                        ""private_key_id"": ""{googleDriveCredential.PrivateKeyId}"",
+                                        ""private_key"": ""{googleDriveCredential.PrivateKey}"",
+                                        ""client_email"": ""{googleDriveCredential.ClientEmail}"",
+                                        ""client_id"": ""{googleDriveCredential.ClientId}"",
+                                        ""auth_uri"": ""{googleDriveCredential.AuthUri}"",
+                                        ""token_uri"": ""{googleDriveCredential.TokenUri}"",
+                                        ""auth_provider_x509_cert_url"": ""{googleDriveCredential.AuthProviderX509CertUrl}"",
+                                        ""client_x509_cert_url"": ""{googleDriveCredential.ClientX509CertUrl}"",
+                                        ""universe_domain"": ""{googleDriveCredential.UniverseDomain}""
                                 }}";
 
-                                var credentialStream = new MemoryStream(Encoding.UTF8.GetBytes(credentialsJson));
-                                var clientSecrets = GoogleClientSecrets.FromStream(credentialStream);
+                                byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(jsonString);
+                                MemoryStream stream = new MemoryStream(byteArray);
 
-                                credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                                    clientSecrets.Secrets,
-                                    new[] { DriveService.ScopeConstants.DriveFile },
-                                        "user",
-                                    CancellationToken.None).Result;
+                                GoogleCredential credential = GoogleCredential.FromStream(stream).CreateScoped(new[]
+                                 {
+                                        DriveService.ScopeConstants.DriveFile
+                                 });
 
                                 _driveService = new DriveService(new BaseClientService.Initializer()
                                 {
                                         HttpClientInitializer = credential,
-                                        ApplicationName = "Your Application Name",
+                                        ApplicationName = "SpDonateFileStorage"
                                 });
                         }
                         catch (Exception ex)
@@ -60,15 +63,15 @@ namespace RafaelSiteCore.Services.GoogleDrive
                 {
                         if (file == null || file.Length == 0)
                         {
-                                return "No file selected.";
+                                return await Task.FromResult("No file selected.");
                         }
 
-                        var allowedExtensions = new[] { ".png", ".gif" };
+                        var allowedExtensions = new[] { ".png", ".gif", ".webp", ".jpeg" };
                         var extension = Path.GetExtension(file.FileName).ToLower();
 
                         if (!allowedExtensions.Contains(extension))
                         {
-                                return "Invalid file type. Only PNG and GIF files are allowed.";
+                                return await Task.FromResult("Invalid file type. Only PNG and GIF files are allowed.");
                         }
 
                         try
@@ -83,19 +86,18 @@ namespace RafaelSiteCore.Services.GoogleDrive
                                 };
 
                                 FilesResource.CreateMediaUpload request;
+
                                 using (var stream = file.OpenReadStream())
                                 {
-                                        request = _driveService.Files.Create(fileMetadata, stream, file.ContentType);
+                                        request = _driveService.Files.Create(fileMetadata, stream, "");
                                         request.Fields = "id";
-                                        await request.UploadAsync();
+                                        var response = request.Upload();
+                                        if (response.Status == UploadStatus.Completed)
+                                        {
+                                        }
                                 }
 
                                 var fileId = request.ResponseBody?.Id;
-
-                                if (string.IsNullOrEmpty(fileId))
-                                {
-                                        return "Error uploading file.";
-                                }
 
                                 var permission = new Google.Apis.Drive.v3.Data.Permission
                                 {
@@ -104,15 +106,12 @@ namespace RafaelSiteCore.Services.GoogleDrive
                                 };
                                 await _driveService.Permissions.Create(permission, fileId).ExecuteAsync();
 
-                                string fileLink = $"https://drive.google.com/thumbnail?id={fileId}";
-
-                                return $"{fileLink}";
+                                return await Task.FromResult($"https://drive.google.com/thumbnail?id={fileId}");
                         }
                         catch (Exception ex)
                         {
-                                return $"Error: {ex}";
+                                return await Task.FromResult($"Error: {ex}");
                         }
                 }
-
         }
 }

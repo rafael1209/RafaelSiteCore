@@ -53,7 +53,7 @@ namespace RafaelSiteCore.Controllers.Blog
 
                         var user = _authLogic.GetUser(token!);
 
-                        _blogLogic.AddPostAsync(createBlogRequest.Text, createBlogRequest.file, user);
+                        _blogLogic.AddPostAsync(createBlogRequest.Text, createBlogRequest.File, user);
 
                         return Ok();
                 }
