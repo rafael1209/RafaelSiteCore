@@ -8,6 +8,8 @@ using RafaelSiteCore.Services.Blog;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
+using RafaelSiteCore.Services.GoogleDrive;
+using RafaelSiteCore.Model.GoogleDriveCredentials;
 
 namespace RafaelSiteCore
 {
@@ -20,6 +22,8 @@ namespace RafaelSiteCore
                 public static string? redirectUrl { get; set; }
                 public static string? connectionString { private get; set; }
                 public static string? mongoDbName { get; set; }
+                public static string? googleDriveFolderId { get; set; }
+                public static GoogleDriveCredentials? googleDriveCredentials { get; set; }
 
                 public Startup()
                 {
@@ -33,6 +37,8 @@ namespace RafaelSiteCore
                         redirectUrl = configuration.GetValue<string>("RedirectUrl");
                         connectionString = configuration.GetValue<string>("ConnectionStrings:MongoDbConnectionString");
                         mongoDbName = configuration.GetValue<string>("ConnectionStrings:MongoDbName");
+                        googleDriveFolderId = configuration.GetValue<string>("GoogleDrive:FolderId");
+                        googleDriveCredentials = configuration.GetSection("installed").Get<GoogleDriveCredentials>();
                 }
 
                 public void ConfigureServices(IServiceCollection services)
@@ -76,6 +82,8 @@ namespace RafaelSiteCore
                               new AuthorizeDbContext(connectionString ?? "", mongoDbName ?? ""));
                         services.AddSingleton<BlogDbContext>(sp =>
                               new BlogDbContext(connectionString ?? "", mongoDbName ?? ""));
+                        services.AddSingleton<GoogleDriveService>(sp =>
+                                new GoogleDriveService(googleDriveCredentials ?? new GoogleDriveCredentials { }, googleDriveFolderId ?? ""));
                 }
 
                 public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

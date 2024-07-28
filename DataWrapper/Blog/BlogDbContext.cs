@@ -13,6 +13,8 @@ namespace RafaelSiteCore.DataWrapper.Blog
         {
                 private readonly MongoClient _mongoClient;
 
+
+
                 private readonly IMongoDatabase _mongoDatabase;
 
                 private IMongoCollection<Post> _blogCollection;
@@ -99,12 +101,12 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         return _userCollection.Find(filter).FirstOrDefault();
                 }
 
-                public void SavePost(string text, string imgUrl, User user)
+                public void SavePost(string text, string fileUrl, User user)
                 {
                         Post post = new Post();
 
                         post.Text = text;
-                        post.ImgUrl = imgUrl;
+                        post.ImgUrl = fileUrl;
                         post.CretaedAtUtc = DateTime.UtcNow;
                         post.UpdatedAtUtc = DateTime.UtcNow;
                         post.AuthorSearchToken = user.Id;

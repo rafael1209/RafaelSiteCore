@@ -3,6 +3,8 @@ using RafaelSiteCore.DataWrapper.Authorize;
 using RafaelSiteCore.DataWrapper.Blog;
 using RafaelSiteCore.Model.Blog;
 using RafaelSiteCore.Model.Users;
+using RafaelSiteCore.Services.Auth;
+using RafaelSiteCore.Services.GoogleDrive;
 
 namespace RafaelSiteCore.Services.Blog
 {
@@ -10,10 +12,14 @@ namespace RafaelSiteCore.Services.Blog
         {
                 private BlogDbContext _dbContext;
 
+                private readonly GoogleDriveService _googleDriveService;
+
                 private AuthorizeDbContext _authorizeDbContext;
 
-                public BlogLogic(BlogDbContext dbContext,AuthorizeDbContext authorizeDbContext)
+                public BlogLogic(BlogDbContext dbContext, AuthorizeDbContext authorizeDbContext, GoogleDriveService googleDriveService)
                 {
+                        _googleDriveService = googleDriveService;
+                        
                         _dbContext = dbContext;
 
                         _authorizeDbContext = authorizeDbContext;
@@ -30,10 +36,12 @@ namespace RafaelSiteCore.Services.Blog
                 }
 
 
-                public void AddPost(string title, string ImgUrl, User user)
+                public async Task AddPostAsync(string title, IFormFile file, User user)
                 {
-                        _dbContext.SavePost(title, ImgUrl, user);
+                        string fileUrl = await _googleDriveService.UploadFile(file);
+                        _dbContext.SavePost(title, fileUrl, user);
                 }
+
 
                 public void LikePost(User user,ObjectId postId)
                 {

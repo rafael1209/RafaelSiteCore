@@ -10,7 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Apis.Auth" Version="1.68.0" />
     <PackageReference Include="Google.Apis.Drive.v3" Version="1.68.0.3466" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
     <PackageReference Include="MongoDB.Bson" Version="2.25.0" />
