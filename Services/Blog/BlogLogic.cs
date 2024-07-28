@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson;
 using RafaelSiteCore.DataWrapper.Authorize;
 using RafaelSiteCore.DataWrapper.Blog;
+using RafaelSiteCore.Interfaces;
 using RafaelSiteCore.Model.Blog;
 using RafaelSiteCore.Model.Users;
 using RafaelSiteCore.Services.Auth;
@@ -12,14 +13,14 @@ namespace RafaelSiteCore.Services.Blog
         {
                 private BlogDbContext _dbContext;
 
-                private readonly GoogleDriveService _googleDriveService;
+                private readonly IStorage _storageService;
 
                 private AuthorizeDbContext _authorizeDbContext;
 
-                public BlogLogic(BlogDbContext dbContext, AuthorizeDbContext authorizeDbContext, GoogleDriveService googleDriveService)
+                public BlogLogic(BlogDbContext dbContext, AuthorizeDbContext authorizeDbContext, IStorage storageService)
                 {
-                        _googleDriveService = googleDriveService;
-                        
+                        _storageService = storageService;
+
                         _dbContext = dbContext;
 
                         _authorizeDbContext = authorizeDbContext;
@@ -30,7 +31,7 @@ namespace RafaelSiteCore.Services.Blog
                         return _dbContext.GetPosts();
                 }
 
-                public void AddComment(User user,string postId, string comment)
+                public void AddComment(User user, string postId, string comment)
                 {
                         _dbContext.AddUserTableToComments(user, postId, comment);
                 }
@@ -38,17 +39,17 @@ namespace RafaelSiteCore.Services.Blog
 
                 public async Task AddPostAsync(string title, IFormFile file, User user)
                 {
-                        string fileUrl = await _googleDriveService.UploadFile(file);
+                        string fileUrl = await _storageService.UploadFile(file);
                         _dbContext.SavePost(title, fileUrl, user);
                 }
 
 
-                public void LikePost(User user,ObjectId postId)
+                public void LikePost(User user, ObjectId postId)
                 {
                         _dbContext.LikePost(user, postId);
                 }
 
-                public void UnlikePost(User user,ObjectId postId)
+                public void UnlikePost(User user, ObjectId postId)
                 {
                         _dbContext.UnlikePost(user, postId);
                 }

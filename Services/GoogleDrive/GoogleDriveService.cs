@@ -4,16 +4,17 @@ using Google.Apis.Services;
 using Microsoft.AspNetCore.Mvc;
 using RafaelSiteCore.Model.GoogleDriveCredentials;
 using System.Text;
+using RafaelSiteCore.Interfaces;
 
 namespace RafaelSiteCore.Services.GoogleDrive
 {
-        public class GoogleDriveService
+        public class GoogleDriveService : IStorage
         {
                 private readonly DriveService _driveService;
 
                 private string _googleDriveFolderId;
 
-                public GoogleDriveService(GoogleDriveCredentials googleDriveCredential,string driveolderId)
+                public GoogleDriveService(GoogleDriveCredentials googleDriveCredential, string driveolderId)
                 {
                         UserCredential credential;
 

@@ -8,6 +8,7 @@ using RafaelSiteCore.Services.Blog;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
+using RafaelSiteCore.Interfaces;
 using RafaelSiteCore.Services.GoogleDrive;
 using RafaelSiteCore.Model.GoogleDriveCredentials;
 
@@ -80,10 +81,14 @@ namespace RafaelSiteCore
                         services.AddSingleton<BlogLogic>();
                         services.AddSingleton<AuthorizeDbContext>(sp =>
                               new AuthorizeDbContext(connectionString ?? "", mongoDbName ?? ""));
+                        services.AddSingleton<IStorage, GoogleDriveService>(sp =>
+                              new GoogleDriveService(googleDriveCredentials ?? new GoogleDriveCredentials { }, googleDriveFolderId ?? ""));
                         services.AddSingleton<BlogDbContext>(sp =>
                               new BlogDbContext(connectionString ?? "", mongoDbName ?? ""));
-                        services.AddSingleton<GoogleDriveService>(sp =>
-                                new GoogleDriveService(googleDriveCredentials ?? new GoogleDriveCredentials { }, googleDriveFolderId ?? ""));
+                        //services.AddSingleton<GoogleDriveService>(sp =>
+                        //        new GoogleDriveService(googleDriveCredentials ?? new GoogleDriveCredentials { }, googleDriveFolderId ?? ""));
+
+
                 }
 
                 public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
