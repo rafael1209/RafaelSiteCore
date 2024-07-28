@@ -71,6 +71,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         var userProfile = new ProfileView()
                         {
                                 Account = account,
+                                IsVerified = user.IsVerified,
                                 IsBanned = user.IsBanned,
                                 Followers = user.Followers.Count(),
                                 Following = user.Following.Count(),
@@ -100,6 +101,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                         return userProfileModel;
                 }
+
                 public List<PostView> GetPosts()
                 {
                         var posts = _blogCollection.Find(post => true)
