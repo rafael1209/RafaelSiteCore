@@ -9,7 +9,6 @@ namespace RafaelSiteCore.Model.Blog
 {
         public class PostView
         {
-                [JsonPropertyName("SearchToken")]
                 public string Id { get; set; } = string.Empty;
 
                 public string Text { get; set; } = string.Empty;
