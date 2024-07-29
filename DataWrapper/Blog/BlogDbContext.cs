@@ -9,7 +9,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
         {
                 private readonly MongoClient _mongoClient;
 
-
+                private const int _pageSizeConst = 10;
 
                 private readonly IMongoDatabase _mongoDatabase;
 
@@ -102,10 +102,12 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         return userProfileModel;
                 }
 
-                public List<PostView> GetPosts()
+                public List<PostView> GetPosts(int page)
                 {
                         var posts = _blogCollection.Find(post => true)
                                                .SortByDescending(post => post.CretaedAtUtc)
+                                               .Skip((page - 1) * _pageSizeConst)
+                                               .Limit(_pageSizeConst)
                                                .ToList();
 
                         var postViewModels = posts.Select(post => new PostView

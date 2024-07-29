@@ -27,9 +27,9 @@ namespace RafaelSiteCore.Controllers.Blog
 
                 [HttpGet]
                 [AuthMiddleware]
-                public IActionResult GetAllPosts()
+                public IActionResult GetAllPosts([FromQuery] int page)
                 {
-                        return Json(_blogLogic.GetPosts());
+                        return Json(_blogLogic.GetPosts(page));
                 }
 
                 [HttpPost("{postId}/comment")]
