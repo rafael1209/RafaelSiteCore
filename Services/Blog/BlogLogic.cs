@@ -62,9 +62,15 @@ namespace RafaelSiteCore.Services.Blog
                 {
                         _dbContext.UnlikePost(user, postId);
                 }
+
                 public Account GetAccount(ulong discordId)
                 {
                         return _authorizeDbContext.GetAccountByIdDiscord(discordId);
+                }
+
+                public PostView GetPost(User user,ObjectId postId)
+                {
+                        return _dbContext.GetPost(user,postId);
                 }
         }
 }

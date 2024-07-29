@@ -25,6 +25,8 @@ namespace RafaelSiteCore.Model.Blog
                 public List<CommantViewModel> Comments { get; set; } = new List<CommantViewModel>();
 
                 public int Likes { get; set; }
+
+                public bool IsLiked { get; set; }
         }
 
         public class CommantViewModel

@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using Microsoft.Extensions.Hosting;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using RafaelSiteCore.Model.Blog;
 using RafaelSiteCore.Model.Users;
@@ -36,8 +37,8 @@ namespace RafaelSiteCore.DataWrapper.Blog
                 {
                         var posts = _blogCollection
                                 .Find(post => post.AuthorSearchToken == id)
-                                                                        .SortByDescending(post => post.CretaedAtUtc)
-                                                                        .ToList();
+                                .SortByDescending(post => post.CretaedAtUtc)
+                                .ToList();
                         return posts;
                 }
 
@@ -118,17 +119,40 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                 CreatedAtUtc = post.CretaedAtUtc,
                                 UpdatedAtUtc = post.UpdatedAtUtc,
                                 Account = GetAccountBySearchToken(post.AuthorSearchToken),
-                                Comments = post.Comments.Select(comment => new CommantViewModel
-                                {
-                                        Id = comment.Id.ToString(),
-                                        Text = comment.Text,
-                                        CreatedAtUtc = comment.CreatedAtUtc,
-                                        Account = GetAccountBySearchToken(comment.AuthorSearchToken),
-                                }).ToList(),
+                                Comments = GetPostComments(post),
                                 Likes = post.Likes.Count(),
                         }).ToList();
 
                         return postViewModels;
+                }
+
+                public List<CommantViewModel> GetPostComments(Post post)
+                {
+                        return post.Comments.Select(comment => new CommantViewModel
+                        {
+                                Id = comment.Id.ToString(),
+                                Text = comment.Text,
+                                CreatedAtUtc = comment.CreatedAtUtc,
+                                Account = GetAccountBySearchToken(comment.AuthorSearchToken),
+                        }).ToList();
+                }
+
+                public PostView GetPost(User user,ObjectId postId)
+                {
+                        var post = _blogCollection.Find(Builders<Post>.Filter.Eq(u => u.Id, postId)).FirstOrDefault();
+
+                        return new PostView
+                        {
+                                Id =post.Id.ToString(),
+                                Text = post.Text,
+                                Account = GetAccountBySearchToken(post.AuthorSearchToken),
+                                CreatedAtUtc = post.CretaedAtUtc,
+                                UpdatedAtUtc = post.UpdatedAtUtc,
+                                ImgUrl= post.ImgUrl,
+                                Likes= post.Likes.Count(),
+                                IsLiked = post.Likes.Contains(user.Id),
+                                Comments = GetPostComments(post)
+                        };
                 }
 
                 public Account GetAccountByDiscordID(ulong discordID)
@@ -198,15 +222,8 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                 public void LikePost(User user, ObjectId postId)
                 {
-                        Account account = new Account()
-                        {
-                                SearchToken = user.Id.ToString(),
-                                AvatarUrl = user.AvatarUrl,
-                                Username = user.Name
-                        };
-
                         var filter = Builders<Post>.Filter.Eq(p => p.Id, postId);
-                        var update = Builders<Post>.Update.AddToSet(p => p.Likes, account);
+                        var update = Builders<Post>.Update.AddToSet(p => p.Likes, user.Id);
 
                         _blogCollection.UpdateOne(filter, update);
                 }
@@ -249,15 +266,8 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                 public void UnlikePost(User user, ObjectId postId)
                 {
-                        Account account = new Account()
-                        {
-                                SearchToken = user.Id.ToString(),
-                                AvatarUrl = user.AvatarUrl,
-                                Username = user.Name
-                        };
-
                         var filter = Builders<Post>.Filter.Eq(p => p.Id, postId);
-                        var update = Builders<Post>.Update.Pull(p => p.Likes, account);
+                        var update = Builders<Post>.Update.Pull(p => p.Likes, user.Id);
 
                         _blogCollection.UpdateOne(filter, update);
                 }

@@ -45,6 +45,20 @@ namespace RafaelSiteCore.Controllers.Blog
                         return Ok();
                 }
 
+                [HttpGet("post/{postId}")]
+                [AuthMiddleware]
+                public IActionResult GetPost([FromRoute] string postId)
+                {
+                        if (!ObjectId.TryParse(postId, out ObjectId postObjectId))
+                                return BadRequest("Invalid PostId format.");
+
+                        Request.Headers.TryGetValue("Authorization", out var token);
+
+                        var user = _authLogic.GetUser(token!);
+
+                        return Ok(_blogLogic.GetPost(user, postObjectId));
+                }
+
                 [HttpPost("{username}/follow")]
                 [AuthMiddleware]
                 public IActionResult AddComment([FromRoute] string username)
