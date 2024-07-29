@@ -29,7 +29,11 @@ namespace RafaelSiteCore.Controllers.Blog
                 [AuthMiddleware]
                 public IActionResult GetAllPosts([FromQuery] int page)
                 {
-                        return Json(_blogLogic.GetPosts(page));
+                        Request.Headers.TryGetValue("Authorization", out var token);
+
+                        var user = _authLogic.GetUser(token!);
+
+                        return Json(_blogLogic.GetPosts(user, page));
                 }
 
                 [HttpPost("{postId}/comment")]

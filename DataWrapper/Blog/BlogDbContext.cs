@@ -39,6 +39,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                 .Find(post => post.AuthorSearchToken == id)
                                 .SortByDescending(post => post.CretaedAtUtc)
                                 .ToList();
+
                         return posts;
                 }
 
@@ -103,7 +104,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         return userProfileModel;
                 }
 
-                public List<PostView> GetPosts(int page)
+                public List<PostView> GetPosts(User user,int page)
                 {
                         var posts = _blogCollection.Find(post => true)
                                                .SortByDescending(post => post.CretaedAtUtc)
@@ -121,6 +122,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                 Account = GetAccountBySearchToken(post.AuthorSearchToken),
                                 Comments = GetPostComments(post),
                                 Likes = post.Likes.Count(),
+                                IsLiked = post.Likes.Contains(user.Id),
                         }).ToList();
 
                         return postViewModels;
