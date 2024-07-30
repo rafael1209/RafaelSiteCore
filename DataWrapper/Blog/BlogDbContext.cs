@@ -166,6 +166,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                 SearchToken = user.Id.ToString(),
                                 AvatarUrl = user.AvatarUrl,
                                 Username = user.Name,
+                                IsVerified = user.IsVerified,
                         };
                 }
 
@@ -178,6 +179,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                 SearchToken = user.Id.ToString(),
                                 AvatarUrl = user.AvatarUrl,
                                 Username = user.Name,
+                                IsVerified = user.IsVerified,
                         };
                 }
 
