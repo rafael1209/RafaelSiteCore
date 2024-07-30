@@ -52,7 +52,7 @@ namespace RafaelSiteCore.Controllers.Blog
 
                         _blogLogic.AddComment(user, postId, request.comment);
 
-                        return Ok();
+                        return Ok("success");
                 }
 
                 [HttpGet("post/{postId}")]
