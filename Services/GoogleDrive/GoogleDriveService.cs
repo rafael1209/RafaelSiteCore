@@ -61,7 +61,7 @@ namespace RafaelSiteCore.Services.GoogleDrive
 
                 public async Task<string> UploadFile(IFormFile file)
                 {
-                        var allowedExtensions = new[] { ".png", ".gif", ".webp", ".jpeg" };
+                        var allowedExtensions = new[] { ".png", ".gif", ".webp", ".jpeg", ".jpg" };
                         var extension = Path.GetExtension(file.FileName).ToLower();
 
                         if (!allowedExtensions.Contains(extension))
