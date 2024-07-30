@@ -50,9 +50,7 @@ namespace RafaelSiteCore.Controllers.Blog
 
                         var user = _authLogic.GetUser(token!);
 
-                        _blogLogic.AddComment(user, postId, request.comment);
-
-                        return Ok("success");
+                        return Ok(_blogLogic.AddCommentAndReturn(user, postId, request.comment));
                 }
 
                 [HttpGet("post/{postId}")]

@@ -55,7 +55,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                         UpdatedAtUtc = post.UpdatedAtUtc,
                                         Account = account,
                                         Comments = post.Comments.AsParallel()
-                                        .Select(comment => new CommantViewModel
+                                        .Select(comment => new CommantView
                                         {
                                                 Id = comment.Id.ToString(),
                                                 Text = comment.Text,
@@ -128,9 +128,9 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         return postViewModels;
                 }
 
-                public List<CommantViewModel> GetPostComments(Post post)
+                public List<CommantView> GetPostComments(Post post)
                 {
-                        return post.Comments.Select(comment => new CommantViewModel
+                        return post.Comments.Select(comment => new CommantView
                         {
                                 Id = comment.Id.ToString(),
                                 Text = comment.Text,
@@ -238,6 +238,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                         AddObjectIdToUserFollow(me, user);
                 }
+
                 public void AddObjectIdToUserFollow(User me, User user)
                 {
                         var filter = Builders<User>.Filter.Eq(p => p.Id, user.Id);
@@ -252,7 +253,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         _userCollection.UpdateOne(userFilter, userUpdate);
                 }
 
-                public void AddUserTableToComments(User user, string postId, string text)
+                public CommantView AddUserTableToCommentsAndReturn(User user, string postId, string text)
                 {
                         Comment comment = new Comment()
                         {
@@ -266,6 +267,16 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         var update = Builders<Post>.Update.AddToSet(p => p.Comments, comment);
 
                         _blogCollection.UpdateOne(filter, update);
+
+                        return new CommantView
+                        {
+                                Id = comment.Id.ToString(),
+                                Text = text,
+                                Account = GetAccountBySearchToken(user.Id),
+                                CreatedAtUtc = comment.CreatedAtUtc,
+                                Likes = comment.Likes.Count(),
+                                IsLiked = comment.Likes.Contains(user.Id)
+                        };
                 }
 
                 public void UnlikePost(User user, ObjectId postId)

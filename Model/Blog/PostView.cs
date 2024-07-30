@@ -21,22 +21,7 @@ namespace RafaelSiteCore.Model.Blog
 
                 public Account Account { get; set; } = new Account();
 
-                public List<CommantViewModel> Comments { get; set; } = new List<CommantViewModel>();
-
-                public int Likes { get; set; }
-
-                public bool IsLiked { get; set; }
-        }
-
-        public class CommantViewModel
-        {
-                public string Id { get; set; } = string.Empty;
-
-                public string Text { get; set; } = string.Empty;
-
-                public DateTime CreatedAtUtc { get; set; }
-
-                public Account Account { get; set; } = new Account();
+                public List<CommantView> Comments { get; set; } = new List<CommantView>();
 
                 public int Likes { get; set; }
 

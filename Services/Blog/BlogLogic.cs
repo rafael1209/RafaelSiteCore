@@ -36,9 +36,9 @@ namespace RafaelSiteCore.Services.Blog
                         return _dbContext.GetPosts(user, page);
                 }
 
-                public void AddComment(User user, string postId, string comment)
+                public CommantView AddCommentAndReturn(User user, string postId, string comment)
                 {
-                        _dbContext.AddUserTableToComments(user, postId, comment);
+                        return _dbContext.AddUserTableToCommentsAndReturn(user, postId, comment);
                 }
 
                 public void AddFollow(User user,string username)
