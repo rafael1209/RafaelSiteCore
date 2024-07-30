@@ -52,10 +52,14 @@ namespace RafaelSiteCore.Services.Blog
                         _dbContext.SavePost(title, fileUrl, user);
                 }
 
-
                 public void LikePost(User user, ObjectId postId)
                 {
                         _dbContext.LikePost(user, postId);
+                }
+
+                public void LikePostComment(User user, ObjectId postId,ObjectId commentId)
+                {
+                        _dbContext.LikeComment(user, postId, commentId);
                 }
 
                 public void UnlikePost(User user, ObjectId postId)

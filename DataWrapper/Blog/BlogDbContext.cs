@@ -232,6 +232,17 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         _blogCollection.UpdateOne(filter, update);
                 }
 
+                public void LikeComment(User user, ObjectId postId, ObjectId commentId)
+                {
+                        var filter = Builders<Post>.Filter.Eq(p => p.Id, postId) &
+                                     Builders<Post>.Filter.ElemMatch(p => p.Comments, c => c.Id == commentId);
+
+                        var update = Builders<Post>.Update.AddToSet(p => p.Comments[1].Likes, user.Id);
+
+                        _blogCollection.UpdateOne(filter, update);
+                }
+
+
                 public void FollowUser(User me,string name)
                 {
                         var user = GetUserByUsername(name);

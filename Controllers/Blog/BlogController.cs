@@ -94,6 +94,7 @@ namespace RafaelSiteCore.Controllers.Blog
                 }
 
                 [HttpPut("{postId}/like")]
+                [AuthMiddleware]
                 public IActionResult LikePost([FromRoute] string postId)
                 {
                         Request.Headers.TryGetValue("Authorization", out var token);
@@ -103,10 +104,23 @@ namespace RafaelSiteCore.Controllers.Blog
 
                         var user = _authLogic.GetUser(token!);
 
-                        if (user == null)
-                                return Unauthorized();
-
                         _blogLogic.LikePost(user, ObjectId.Parse(postId));
+
+                        return Ok();
+                }
+
+                [HttpPut("{postId}/{commentId}/like")]
+                public IActionResult LikePostComment([FromRoute] string postId, [FromRoute] string commentId)
+                {
+                        Request.Headers.TryGetValue("Authorization", out var token);
+
+                        if (!ObjectId.TryParse(postId, out ObjectId postObjectId) 
+                                || !ObjectId.TryParse(commentId, out ObjectId commentObjectId))
+                                return BadRequest("Invalid PostId or CommentId format.");
+
+                        var user = _authLogic.GetUser(token!);
+
+                        _blogLogic.LikePostComment(user, postObjectId,commentObjectId);
 
                         return Ok();
                 }
