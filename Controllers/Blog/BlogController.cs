@@ -43,6 +43,9 @@ namespace RafaelSiteCore.Controllers.Blog
                 [AuthMiddleware]
                 public IActionResult AddComment([FromRoute] string postId,CommentRequest request)
                 {
+                        if (string.IsNullOrEmpty(request.comment))
+                                return BadRequest("Comment is empty.");
+
                         Request.Headers.TryGetValue("Authorization", out var token);
 
                         var user = _authLogic.GetUser(token!);

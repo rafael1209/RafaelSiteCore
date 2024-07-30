@@ -13,5 +13,7 @@ namespace RafaelSiteCore.Model.Blog
                 public DateTime CreatedAtUtc { get; set; }
 
                 public ObjectId AuthorSearchToken { get; set; }
+
+                public List<ObjectId> Likes { get; set; } = new List<ObjectId>();
         }
 }
