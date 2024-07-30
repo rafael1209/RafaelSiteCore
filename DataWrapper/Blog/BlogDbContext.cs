@@ -104,7 +104,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         return userProfileModel;
                 }
 
-                public List<PostView> GetPosts(User user,int page)
+                public List<PostView> GetPosts(User user, int page)
                 {
                         var posts = _blogCollection.Find(post => true)
                                                .SortByDescending(post => post.CretaedAtUtc)

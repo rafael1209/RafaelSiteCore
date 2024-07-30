@@ -33,6 +33,9 @@ namespace RafaelSiteCore.Controllers.Blog
 
                         var user = _authLogic.GetUser(token!);
 
+                        if(page ==0)
+                        page = 1;
+
                         return Json(_blogLogic.GetPosts(user, page));
                 }
 
