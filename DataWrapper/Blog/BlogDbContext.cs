@@ -69,7 +69,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         return userPostView;
                 }
 
-                public ProfileView GetUserProfileView(List<PostView> userPosts,Account account,User user,bool IsFollowed)
+                public ProfileView GetUserProfileView(List<PostView> userPosts, Account account, User user, bool IsFollowed)
                 {
                         var userProfile = new ProfileView()
                         {
@@ -105,63 +105,35 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         return userProfileModel;
                 }
 
-                //private static readonly SemaphoreSlim Semaphore = new SemaphoreSlim(3);
-
                 public List<PostView> GetPosts(User user, int page)
                 {
                         var posts = _blogCollection.Find(post => true)
-                               .SortByDescending(post => post.CretaedAtUtc)
-                               .Skip((page - 1) * _pageSizeConst)
-                               .Limit(_pageSizeConst)
-                               .ToList();
-                        var postsView = new List<PostView>();
+                                               .SortByDescending(post => post.CretaedAtUtc)
+                                               .Skip((page - 1) * _pageSizeConst)
+                                               .Limit(_pageSizeConst)
+                                               .ToList();
 
-                        var tasks = new List<Task>();
-
-                        foreach (var post in posts)
+                        var postViewModels = posts.AsParallel()
+                                .Select(post => new PostView
                         {
-                                //Semaphore.Wait();
+                                Id = post.Id.ToString(),
+                                Text = post.Text,
+                                ImgUrl = post.ImgUrl,
+                                CreatedAtUtc = post.CretaedAtUtc,
+                                UpdatedAtUtc = post.UpdatedAtUtc,
+                                Account = GetAccountBySearchToken(post.AuthorSearchToken),
+                                Comments = GetPostComments(post),
+                                Likes = post.Likes.Count(),
+                                IsLiked = post.Likes.Contains(user.Id),
+                        }).ToList();
 
-                                tasks.Add(Task.Run(async () =>
-                                {
-                                        try
-                                        {
-                                                var filteredPost = new PostView
-                                                {
-                                                        Id = post.Id.ToString(),
-                                                        Text = post.Text,
-                                                        ImgUrl = post.ImgUrl,
-                                                        CreatedAtUtc = post.CretaedAtUtc,
-                                                        UpdatedAtUtc = post.UpdatedAtUtc,
-                                                        Account = GetAccountBySearchToken(post.AuthorSearchToken),
-                                                        Comments = GetPostComments(post),
-                                                        Likes = post.Likes.Count(),
-                                                        IsLiked = post.Likes.Contains(user.Id),
-                                                };
-
-                                                postsView.Add(filteredPost);
-                                               
-                                                //lock (postsView)//TODO RAFAELLO GOOGLE WHAT IS RACE CONDITION AND FOR WHAT LOCK MECHANISMS ARE NEEDED 
-                                                //{
-                                                //        postsView.Add(filteredPost);
-                                                //}
-                                        }
-                                        finally
-                                        {
-                                                //Semaphore.Release();
-                                        }
-                                }));
-
-                        }
-                        
-                        Task.WhenAll(tasks.ToArray()).GetAwaiter().GetResult();
-                        
-                        return postsView;
+                        return postViewModels;
                 }
 
                 public List<CommantView> GetPostComments(Post post)
                 {
-                        return post.Comments.AsParallel().Select(comment => new CommantView
+                        return post.Comments.AsParallel()
+                                .Select(comment => new CommantView
                         {
                                 Id = comment.Id.ToString(),
                                 Text = comment.Text,
@@ -170,19 +142,19 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         }).ToList();
                 }
 
-                public PostView GetPost(User user,ObjectId postId)
+                public PostView GetPost(User user, ObjectId postId)
                 {
                         var post = _blogCollection.Find(Builders<Post>.Filter.Eq(u => u.Id, postId)).FirstOrDefault();
 
                         return new PostView
                         {
-                                Id =post.Id.ToString(),
+                                Id = post.Id.ToString(),
                                 Text = post.Text,
                                 Account = GetAccountBySearchToken(post.AuthorSearchToken),
                                 CreatedAtUtc = post.CretaedAtUtc,
                                 UpdatedAtUtc = post.UpdatedAtUtc,
-                                ImgUrl= post.ImgUrl,
-                                Likes= post.Likes.Count(),
+                                ImgUrl = post.ImgUrl,
+                                Likes = post.Likes.Count(),
                                 IsLiked = post.Likes.Contains(user.Id),
                                 Comments = GetPostComments(post)
                         };
@@ -274,7 +246,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                 }
 
 
-                public void FollowUser(User me,string name)
+                public void FollowUser(User me, string name)
                 {
                         var user = GetUserByUsername(name);
 
