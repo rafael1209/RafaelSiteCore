@@ -122,7 +122,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                 CreatedAtUtc = post.CretaedAtUtc,
                                 UpdatedAtUtc = post.UpdatedAtUtc,
                                 Account = GetAccountBySearchToken(post.AuthorSearchToken),
-                                Comments = GetPostComments(post),
+                                Comments = GetPostComments(user, post),
                                 Likes = post.Likes.Count(),
                                 IsLiked = post.Likes.Contains(user.Id),
                         }).ToList();
@@ -130,7 +130,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         return postViewModels;
                 }
 
-                public List<CommantView> GetPostComments(Post post)
+                public List<CommantView> GetPostComments(User user,Post post)
                 {
                         return post.Comments.AsParallel()
                                 .Select(comment => new CommantView
@@ -139,7 +139,9 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                 Text = comment.Text,
                                 CreatedAtUtc = comment.CreatedAtUtc,
                                 Account = GetAccountBySearchToken(comment.AuthorSearchToken),
-                        }).ToList();
+                                        Likes = comment.Likes.Count(),
+                                IsLiked = comment.Likes.Contains(user.Id),
+                                }).ToList();
                 }
 
                 public PostView GetPost(User user, ObjectId postId)
@@ -156,7 +158,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                 ImgUrl = post.ImgUrl,
                                 Likes = post.Likes.Count(),
                                 IsLiked = post.Likes.Contains(user.Id),
-                                Comments = GetPostComments(post)
+                                Comments = GetPostComments(user, post)
                         };
                 }
 

@@ -110,6 +110,7 @@ namespace RafaelSiteCore.Controllers.Blog
                 }
 
                 [HttpPut("{postId}/{commentId}/like")]
+                [AuthMiddleware]
                 public IActionResult LikePostComment([FromRoute] string postId, [FromRoute] string commentId)
                 {
                         Request.Headers.TryGetValue("Authorization", out var token);
