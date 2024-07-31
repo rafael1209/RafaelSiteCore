@@ -177,9 +177,12 @@ namespace RafaelSiteCore.DataWrapper.Blog
                 {
                         var user = GetUserBySearchToken(token);
 
+                        if(user == null)
+                                return null!;
+
                         return new Account()
                         {
-                                SearchToken = user.Id.ToString(),
+                                SearchToken = user!.Id.ToString(),
                                 AvatarUrl = user.AvatarUrl,
                                 Username = user.Name,
                                 IsVerified = user.IsVerified,
