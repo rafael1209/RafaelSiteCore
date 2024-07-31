@@ -240,12 +240,30 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                 public void LikeComment(User user, ObjectId postId, ObjectId commentId)
                 {
-                        var filter = Builders<Post>.Filter.Eq(p => p.Id, postId) &
-                                     Builders<Post>.Filter.ElemMatch(p => p.Comments, c => c.Id == commentId);
+                        var post = _blogCollection.Find(p => p.Id == postId).FirstOrDefault();
 
-                        var update = Builders<Post>.Update.AddToSet(p => p.Comments[1].Likes, user.Id);
+                        if (post != null)
+                        {
+                                var comment = post.Comments.FirstOrDefault(c => c.Id == commentId);
 
-                        _blogCollection.UpdateOne(filter, update);
+                                if (comment != null)
+                                {
+                                        if (!comment.Likes.Contains(user.Id))
+                                        {
+                                                comment.Likes.Add(user.Id);
+
+                                                _blogCollection.ReplaceOne(p => p.Id == postId, post);
+                                        }
+                                }
+                                else
+                                {
+                                        throw new ArgumentException("Comment not found.");
+                                }
+                        }
+                        else
+                        {
+                                throw new ArgumentException("Post not found.");
+                        }
                 }
 
 
