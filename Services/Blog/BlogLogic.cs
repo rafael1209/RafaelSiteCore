@@ -62,6 +62,11 @@ namespace RafaelSiteCore.Services.Blog
                         _dbContext.LikeComment(user, postId, commentId);
                 }
 
+                public void UnLikePostComment(User user, ObjectId postId, ObjectId commentId)
+                {
+                        _dbContext.UnLikeComment(user, postId, commentId);
+                }
+
                 public void UnlikePost(User user, ObjectId postId)
                 {
                         _dbContext.UnlikePost(user, postId);

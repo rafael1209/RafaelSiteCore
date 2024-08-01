@@ -268,6 +268,34 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         }
                 }
 
+                public void UnLikeComment(User user, ObjectId postId, ObjectId commentId)
+                {
+                        var post = _blogCollection.Find(p => p.Id == postId).FirstOrDefault();
+
+                        if (post != null)
+                        {
+                                var comment = post.Comments.FirstOrDefault(c => c.Id == commentId);
+
+                                if (comment != null)
+                                {
+                                        if (comment.Likes.Contains(user.Id))
+                                        {
+                                                comment.Likes.Remove(user.Id);
+
+                                                _blogCollection.ReplaceOne(p => p.Id == postId, post);
+                                        }
+                                }
+                                else
+                                {
+                                        throw new ArgumentException("Comment not found.");
+                                }
+                        }
+                        else
+                        {
+                                throw new ArgumentException("Post not found.");
+                        }
+                }
+
 
                 public void FollowUser(User me, string name)
                 {

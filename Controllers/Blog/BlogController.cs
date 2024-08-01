@@ -126,6 +126,23 @@ namespace RafaelSiteCore.Controllers.Blog
                         return Ok();
                 }
 
+                [HttpDelete("{postId}/{commentId}/like")]
+                [AuthMiddleware]
+                public IActionResult UnLikePostComment([FromRoute] string postId, [FromRoute] string commentId)
+                {
+                        Request.Headers.TryGetValue("Authorization", out var token);
+
+                        if (!ObjectId.TryParse(postId, out ObjectId postObjectId)
+                                || !ObjectId.TryParse(commentId, out ObjectId commentObjectId))
+                                return BadRequest("Invalid PostId or CommentId format.");
+
+                        var user = _authLogic.GetUser(token!);
+
+                        _blogLogic.UnLikePostComment(user, postObjectId, commentObjectId);
+
+                        return Ok();
+                }
+
                 [HttpDelete("{postId}/like")]
                 [AuthMiddleware]
                 public IActionResult UnlikePost([FromRoute] string postId)
