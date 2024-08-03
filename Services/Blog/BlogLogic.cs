@@ -48,7 +48,11 @@ namespace RafaelSiteCore.Services.Blog
 
                 public async Task AddPostAsync(string title, IFormFile file, User user)
                 {
-                        string fileUrl = await _storageService.UploadFile(file);
+                        string fileUrl = "";
+
+                        if (file!=null)
+                                fileUrl = await _storageService.UploadFile(file);
+
                         _dbContext.SavePost(title, fileUrl, user);
                 }
 
