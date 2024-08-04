@@ -3,6 +3,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using RafaelSiteCore.Model.Blog;
 using RafaelSiteCore.Model.Users;
+using Microsoft.Extensions.Caching.Memory;
 using System.Linq;
 
 namespace RafaelSiteCore.DataWrapper.Blog
@@ -10,39 +11,42 @@ namespace RafaelSiteCore.DataWrapper.Blog
         public class BlogDbContext
         {
                 private readonly MongoClient _mongoClient;
-
+                private readonly IMemoryCache _cache;
                 private const int _pageSizeConst = 10;
-
                 private readonly IMongoDatabase _mongoDatabase;
-
                 private IMongoCollection<Post> _blogCollection;
-
                 private IMongoCollection<Model.Users.User> _userCollection;
-
                 private const string ConstPostsCollection = "Posts";
-
                 private const string ConstUsersCollection = "Users";
 
-                public BlogDbContext(string connectionString, string databaseName)
+                public BlogDbContext(string connectionString, string databaseName, IMemoryCache cache)
                 {
                         this._mongoClient = new MongoClient(connectionString);
-
                         this._mongoDatabase = _mongoClient.GetDatabase(databaseName);
-
                         this._blogCollection = _mongoDatabase.GetCollection<Post>(ConstPostsCollection);
-
                         this._userCollection = _mongoDatabase.GetCollection<Model.Users.User>(ConstUsersCollection);
+                        this._cache = cache;
                 }
 
                 public List<Post> GetUserPosts(ObjectId id)
                 {
-                        var posts = _blogCollection
-                                .Find(post => post.AuthorSearchToken == id)
-                                .SortByDescending(post => post.CretaedAtUtc)
-                                .ToList();
+                        string cacheKey = $"UserPosts-{id}";
+                        if (!_cache.TryGetValue(cacheKey, out List<Post> posts))
+                        {
+                                posts = _blogCollection
+                                    .Find(post => post.AuthorSearchToken == id)
+                                    .SortByDescending(post => post.CretaedAtUtc)
+                                    .ToList();
+
+                                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                                    .SetSlidingExpiration(TimeSpan.FromMinutes(30));
+
+                                _cache.Set(cacheKey, posts, cacheEntryOptions);
+                        }
 
                         return posts;
                 }
+
 
                 public List<PostView> GetUserPostView(List<Post> posts, Account account)
                 {
@@ -88,44 +92,59 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                 public ProfileView GetUserProfile(string name, string authToken)
                 {
-                        var requestOwner = GetUserByAuthToken(authToken);
+                        string cacheKey = $"UserProfile-{name}-{authToken}";
+                        if (!_cache.TryGetValue(cacheKey, out ProfileView userProfileModel))
+                        {
+                                var requestOwner = GetUserByAuthToken(authToken);
+                                var user = GetUserByUsername(name);
+                                var userAccount = GetAccountBySearchToken(user.Id);
+                                var userPosts = GetUserPosts(user.Id);
+                                var userPostView = GetUserPostView(userPosts, userAccount);
+                                bool isFollowed = requestOwner.Following.Contains(user.Id);
 
-                        var user = GetUserByUsername(name);
+                                userProfileModel = GetUserProfileView(userPostView, userAccount, user, isFollowed);
 
-                        var userAccount = GetAccountBySearchToken(user.Id);
+                                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                                    .SetSlidingExpiration(TimeSpan.FromMinutes(30));
 
-                        var userPosts = GetUserPosts(user.Id);
-
-                        var userPostView = GetUserPostView(userPosts, userAccount);
-
-                        bool isFollowed = requestOwner.Following.Contains(user.Id);
-
-                        var userProfileModel = GetUserProfileView(userPostView, userAccount, user, isFollowed);
+                                _cache.Set(cacheKey, userProfileModel, cacheEntryOptions);
+                        }
 
                         return userProfileModel;
                 }
 
+
                 public List<PostView> GetPosts(User user, int page)
                 {
-                        var posts = _blogCollection.Find(post => true)
-                                               .SortByDescending(post => post.CretaedAtUtc)
-                                               .Skip((page - 1) * _pageSizeConst)
-                                               .Limit(_pageSizeConst)
-                                               .ToList();
+                        string cacheKey = $"GetPosts_{page}";
 
-                        var postViewModels = posts.AsParallel()
-                                .Select(post => new PostView
+                        if (!_cache.TryGetValue(cacheKey, out List<PostView> postViewModels))
                         {
-                                Id = post.Id.ToString(),
-                                Text = post.Text,
-                                ImgUrl = post.ImgUrl,
-                                CreatedAtUtc = post.CretaedAtUtc,
-                                UpdatedAtUtc = post.UpdatedAtUtc,
-                                Account = GetAccountBySearchToken(post.AuthorSearchToken),
-                                Comments = GetPostComments(user, post),
-                                Likes = post.Likes.Count(),
-                                IsLiked = post.Likes.Contains(user.Id),
-                        }).ToList();
+                                var posts = _blogCollection.Find(post => true)
+                                                           .SortByDescending(post => post.CretaedAtUtc)
+                                                           .Skip((page - 1) * _pageSizeConst)
+                                                           .Limit(_pageSizeConst)
+                                                           .ToList();
+
+                                postViewModels = posts.AsParallel()
+                                    .Select(post => new PostView
+                                    {
+                                            Id = post.Id.ToString(),
+                                            Text = post.Text,
+                                            ImgUrl = post.ImgUrl,
+                                            CreatedAtUtc = post.CretaedAtUtc,
+                                            UpdatedAtUtc = post.UpdatedAtUtc,
+                                            Account = GetAccountBySearchToken(post.AuthorSearchToken),
+                                            Comments = GetPostComments(user, post),
+                                            Likes = post.Likes.Count(),
+                                            IsLiked = post.Likes.Contains(user.Id),
+                                    }).ToList();
+
+                                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+
+                                _cache.Set(cacheKey, postViewModels, cacheEntryOptions);
+                        }
 
                         return postViewModels;
                 }

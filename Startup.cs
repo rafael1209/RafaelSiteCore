@@ -11,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using RafaelSiteCore.Interfaces;
 using RafaelSiteCore.Services.GoogleDrive;
 using RafaelSiteCore.Model.GoogleDriveCredentials;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace RafaelSiteCore
 {
@@ -71,21 +72,21 @@ namespace RafaelSiteCore
                                 });
 
                                 options.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
                 {
+                    Name = "Bearer",
+                    In = ParameterLocation.Header,
+                    Reference = new OpenApiReference
                     {
-                        new OpenApiSecurityScheme
-                        {
-                            Name = "Bearer",
-                            In = ParameterLocation.Header,
-                            Reference = new OpenApiReference
-                            {
-                                Id = "Bearer",
-                                Type = ReferenceType.SecurityScheme
-                            }
-                        },
-                        new List<string>()
+                        Id = "Bearer",
+                        Type = ReferenceType.SecurityScheme
                     }
-                });
+                },
+                new List<string>()
+            }
+        });
                         });
                         services.AddHttpContextAccessor();
                         services.AddSingleton<DiscordApiClient>(sp =>
@@ -96,9 +97,13 @@ namespace RafaelSiteCore
                             new AuthorizeDbContext(connectionString ?? "", mongoDbName ?? ""));
                         services.AddSingleton<IStorage, GoogleDriveService>(sp =>
                             new GoogleDriveService(googleDriveCredentials ?? new GoogleDriveCredentials { }, googleDriveFolderId ?? ""));
+
+                        services.AddMemoryCache();
+
                         services.AddSingleton<BlogDbContext>(sp =>
-                            new BlogDbContext(connectionString ?? "", mongoDbName ?? ""));
+                            new BlogDbContext(connectionString ?? "", mongoDbName ?? "", sp.GetRequiredService<IMemoryCache>()));
                 }
+
 
                 public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
                 {
