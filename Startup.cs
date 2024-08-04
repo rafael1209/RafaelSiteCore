@@ -29,9 +29,9 @@ namespace RafaelSiteCore
                 public Startup()
                 {
                         configuration = new ConfigurationBuilder()
-                                .AddEnvironmentVariables()
-                                .AddJsonFile("appsettings.json", optional: true)
-                                .Build();
+                            .AddEnvironmentVariables()
+                            .AddJsonFile("appsettings.json", optional: true)
+                            .Build();
 
                         clientId = configuration.GetValue<ulong>("ClientId");
                         clientSecret = configuration.GetValue<string>("ClientSecret");
@@ -89,17 +89,15 @@ namespace RafaelSiteCore
                         });
                         services.AddHttpContextAccessor();
                         services.AddSingleton<DiscordApiClient>(sp =>
-                              new DiscordApiClient(clientId ?? 0, clientSecret ?? "", redirectUrl ?? ""));
+                            new DiscordApiClient(clientId ?? 0, clientSecret ?? "", redirectUrl ?? ""));
                         services.AddSingleton<DiscordAuthLogic>();
                         services.AddSingleton<BlogLogic>();
                         services.AddSingleton<AuthorizeDbContext>(sp =>
-                              new AuthorizeDbContext(connectionString ?? "", mongoDbName ?? ""));
+                            new AuthorizeDbContext(connectionString ?? "", mongoDbName ?? ""));
                         services.AddSingleton<IStorage, GoogleDriveService>(sp =>
-                              new GoogleDriveService(googleDriveCredentials ?? new GoogleDriveCredentials { }, googleDriveFolderId ?? ""));
+                            new GoogleDriveService(googleDriveCredentials ?? new GoogleDriveCredentials { }, googleDriveFolderId ?? ""));
                         services.AddSingleton<BlogDbContext>(sp =>
-                              new BlogDbContext(connectionString ?? "", mongoDbName ?? ""));
-
-
+                            new BlogDbContext(connectionString ?? "", mongoDbName ?? ""));
                 }
 
                 public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -107,6 +105,8 @@ namespace RafaelSiteCore
                         if (env.IsDevelopment())
                         {
                                 app.UseDeveloperExceptionPage();
+                                app.UseSwagger();
+                                app.UseSwaggerUI();
                                 app.UseHsts();
                         }
 
@@ -114,13 +114,14 @@ namespace RafaelSiteCore
                         app.UseRouting();
                         app.UseAuthentication();
                         app.UseAuthorization();
-                        app.UseSwagger();
-                        app.UseSwaggerUI();
                         app.UseCors(k => { k.WithMethods("POST", "GET", "PATCH", "PUT"); k.AllowAnyOrigin(); k.AllowAnyHeader(); });
                         app.UseEndpoints(endpoints =>
                         {
                                 endpoints.MapDefaultControllerRoute().AllowAnonymous();
-                                endpoints.MapSwagger();
+                                if (env.IsDevelopment())
+                                {
+                                        endpoints.MapSwagger();
+                                }
                                 endpoints.MapControllers().AllowAnonymous();
                         });
                 }
