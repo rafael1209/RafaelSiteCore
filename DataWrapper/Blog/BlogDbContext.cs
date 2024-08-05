@@ -112,7 +112,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         var allPostFilteredByCommentsLikeCount = allPost.OrderByDescending(post => post.Comments.Count + post.Likes.Count).ToList();
                         //Todo process allPostFilteredByCommentsLikeCount 
                         
-                        var postViewModels = posts.AsParallel()
+                        var postViewModels = allPostFilteredByCommentsLikeCount.AsParallel()
                            .Select(post => new PostDto
                            {
                                    Id = post.Id.ToString(),
