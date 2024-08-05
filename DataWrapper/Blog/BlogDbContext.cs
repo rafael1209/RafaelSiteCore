@@ -105,6 +105,13 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                                    .Limit(_pageSizeConst)
                                                    .ToList();
 
+                        var allPost = _blogCollection.Find(post => true)
+                                .SortByDescending(post => post.CretaedAtUtc)
+                                .ToList();
+                        
+                        var allPostFilteredByCommentsLikeCount = allPost.OrderByDescending(post => post.Comments.Count + post.Likes.Count).ToList();
+                        //Todo process allPostFilteredByCommentsLikeCount 
+                        
                         var postViewModels = posts.AsParallel()
                            .Select(post => new PostDto
                            {
