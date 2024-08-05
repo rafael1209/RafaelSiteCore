@@ -13,13 +13,28 @@ namespace RafaelSiteCore.Services.Logger
                         _webhookUrl = webhookUrl;
                 }
 
-                public async Task TestAsync(string name)
+                public void InfoLogger(string title,string description)
+                {
+                        SendWebhook("Alert", title, description, Color.Yellow);
+                }
+
+                public void ErrorLogger() 
+                {
+                        
+                }
+
+                public void WarningLogger()
+                {
+
+                }
+
+                public void SendWebhook(string name, string title, string description ,Color color)
                 {
                         try
                         {
                                 DiscordWebhook hook = new DiscordWebhook
                                 {
-                                        Uri = new Uri("https://discord.com/api/webhooks/1270135141938761891/LGtWnHmC-CcRyMmPve2luGAVHbj-W_kiLIohjdG0YGPJ2JUsZaiaQNaRPfcpSYD6SRLg")
+                                        Uri = new Uri(_webhookUrl)
                                 };
 
                                 DiscordMessage message = new DiscordMessage
@@ -30,13 +45,14 @@ namespace RafaelSiteCore.Services.Logger
 
                                 DiscordEmbed embed = new DiscordEmbed
                                 {
-                                        Title = "Embed title",
-                                        Description = "sam",
+                                        Title = title,
+                                        Description = description,
+                                        Color = new DiscordColor(color)
                                 };
 
                                 message.Embeds.Add(embed);
 
-                                await hook.SendAsync(message);
+                                hook.SendAsync(message);
                         }
                         catch (Exception ex)
                         {

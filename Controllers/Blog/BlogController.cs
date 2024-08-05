@@ -32,13 +32,13 @@ namespace RafaelSiteCore.Controllers.Blog
 
                 [HttpGet]
                 [AuthMiddleware]
-                public async Task<IActionResult> GetAllPostsAsync([FromQuery] int page)
+                public IActionResult GetAllPostsAsync([FromQuery] int page)
                 {
                         Request.Headers.TryGetValue("Authorization", out var token);
 
                         var user = _authLogic.GetUser(token!);
 
-                        await _discordWebhook.TestAsync(HttpContext.Connection.RemoteIpAddress.ToString());
+                        _discordWebhook.InfoLogger("Get Posts",$"User: {user.Name} (<@{user.DiscordId}>)");
 
                         if (page ==0)
                                 page = 1;

@@ -45,17 +45,17 @@ namespace RafaelSiteCore
                         googleDriveFolderId = configuration.GetValue<string>("GoogleDrive:FolderId");
                         googleDriveCredentials = new GoogleDriveCredentials
                         {
-                                Type = configuration.GetValue<string>("GoogleDrive:Type"),
-                                ProjectId = configuration.GetValue<string>("GoogleDrive:ProjectId"),
-                                PrivateKeyId = configuration.GetValue<string>("GoogleDrive:PrivateKeyId"),
-                                PrivateKey = configuration.GetValue<string>("GoogleDrive:PrivateKey"),
-                                ClientEmail = configuration.GetValue<string>("GoogleDrive:ClientEmail"),
-                                ClientId = configuration.GetValue<string>("GoogleDrive:ClientId"),
-                                AuthUri = configuration.GetValue<string>("GoogleDrive:AuthUri"),
-                                TokenUri = configuration.GetValue<string>("GoogleDrive:TokenUri"),
-                                AuthProviderX509CertUrl = configuration.GetValue<string>("GoogleDrive:AuthProviderX509CertUrl"),
-                                ClientX509CertUrl = configuration.GetValue<string>("GoogleDrive:ClientX509CertUrl"),
-                                UniverseDomain = configuration.GetValue<string>("GoogleDrive:UniverseDomain")
+                                Type = configuration.GetValue<string>("GoogleDrive:Type")!,
+                                ProjectId = configuration.GetValue<string>("GoogleDrive:ProjectId")!,
+                                PrivateKeyId = configuration.GetValue<string>("GoogleDrive:PrivateKeyId")!,
+                                PrivateKey = configuration.GetValue<string>("GoogleDrive:PrivateKey")!,
+                                ClientEmail = configuration.GetValue<string>("GoogleDrive:ClientEmail")!,
+                                ClientId = configuration.GetValue<string>("GoogleDrive:ClientId")!,
+                                AuthUri = configuration.GetValue<string>("GoogleDrive:AuthUri")!,
+                                TokenUri = configuration.GetValue<string>("GoogleDrive:TokenUri")!,
+                                AuthProviderX509CertUrl = configuration.GetValue<string>("GoogleDrive:AuthProviderX509CertUrl")!,
+                                ClientX509CertUrl = configuration.GetValue<string>("GoogleDrive:ClientX509CertUrl")!,
+                                UniverseDomain = configuration.GetValue<string>("GoogleDrive:UniverseDomain")!
                         };
                 }
 
