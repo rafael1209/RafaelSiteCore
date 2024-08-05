@@ -132,6 +132,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         return post.Comments
                              .AsParallel()
                              .OrderBy(comment => comment.CreatedAtUtc)
+                             .Reverse()
                              .Select(comment => new CommantView
                              {
                                      Id = comment.Id.ToString(),
