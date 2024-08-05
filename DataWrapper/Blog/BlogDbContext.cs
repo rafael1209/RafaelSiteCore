@@ -62,7 +62,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         return userPostView;
                 }
 
-                public ProfileView GetUserProfileView(List<PostDto> userPosts, Account account, User user, bool IsFollowed,bool IsOwner)
+                public ProfileView GetUserProfileView(List<PostDto> userPosts, Account account, User user, bool IsFollowed, bool IsOwner)
                 {
                         var userProfile = new ProfileView()
                         {
@@ -129,16 +129,19 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                 public List<CommantView> GetPostComments(User user, Post post)
                 {
-                        return post.Comments.AsParallel()
-                                .Select(comment => new CommantView
-                                {
-                                        Id = comment.Id.ToString(),
-                                        Text = comment.Text,
-                                        CreatedAtUtc = comment.CreatedAtUtc,
-                                        Account = GetAccountBySearchToken(comment.AuthorSearchToken),
-                                        Likes = comment.Likes.Count(),
-                                        IsLiked = comment.Likes.Contains(user.Id),
-                                }).ToList();
+                        return post.Comments
+                             .AsParallel()
+                             .OrderBy(comment => comment.CreatedAtUtc)
+                             .Select(comment => new CommantView
+                             {
+                                     Id = comment.Id.ToString(),
+                                     Text = comment.Text,
+                                     CreatedAtUtc = comment.CreatedAtUtc,
+                                     Account = GetAccountBySearchToken(comment.AuthorSearchToken),
+                                     Likes = comment.Likes.Count(),
+                                     IsLiked = comment.Likes.Contains(user.Id),
+                             })
+                             .ToList();
                 }
 
                 public PostView GetPost(User user, ObjectId postId)
