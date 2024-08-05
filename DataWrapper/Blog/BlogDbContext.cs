@@ -1,13 +1,8 @@
-﻿using Microsoft.Extensions.Hosting;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Driver;
 using RafaelSiteCore.Model.Blog;
 using RafaelSiteCore.Model.Users;
 using Microsoft.Extensions.Caching.Memory;
-using System.Linq;
-using System.Xml.Linq;
-using x3rt.DiscordOAuth2.Entities;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace RafaelSiteCore.DataWrapper.Blog
 {
@@ -18,7 +13,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                 private const int _pageSizeConst = 10;
                 private readonly IMongoDatabase _mongoDatabase;
                 private IMongoCollection<Post> _blogCollection;
-                private IMongoCollection<Model.Users.User> _userCollection;
+                private IMongoCollection<User> _userCollection;
                 private const string ConstPostsCollection = "Posts";
                 private const string ConstUsersCollection = "Users";
 
