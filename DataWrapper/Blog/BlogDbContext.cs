@@ -5,6 +5,8 @@ using RafaelSiteCore.Model.Blog;
 using RafaelSiteCore.Model.Users;
 using Microsoft.Extensions.Caching.Memory;
 using System.Linq;
+using System.Xml.Linq;
+using x3rt.DiscordOAuth2.Entities;
 
 namespace RafaelSiteCore.DataWrapper.Blog
 {
@@ -30,19 +32,10 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                 public List<Post> GetUserPosts(ObjectId id)
                 {
-                        string cacheKey = $"UserPosts-{id}";
-                        if (!_cache.TryGetValue(cacheKey, out List<Post> posts))
-                        {
-                                posts = _blogCollection
-                                    .Find(post => post.AuthorSearchToken == id)
-                                    .SortByDescending(post => post.CretaedAtUtc)
-                                    .ToList();
-
-                                var cacheEntryOptions = new MemoryCacheEntryOptions()
-                                    .SetSlidingExpiration(TimeSpan.FromMinutes(30));
-
-                                _cache.Set(cacheKey, posts, cacheEntryOptions);
-                        }
+                        var posts = _blogCollection
+                            .Find(post => post.AuthorSearchToken == id)
+                            .SortByDescending(post => post.CretaedAtUtc)
+                            .ToList();
 
                         return posts;
                 }
@@ -92,23 +85,14 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                 public ProfileView GetUserProfile(string name, string authToken)
                 {
-                        string cacheKey = $"UserProfile-{name}-{authToken}";
-                        if (!_cache.TryGetValue(cacheKey, out ProfileView userProfileModel))
-                        {
-                                var requestOwner = GetUserByAuthToken(authToken);
-                                var user = GetUserByUsername(name);
-                                var userAccount = GetAccountBySearchToken(user.Id);
-                                var userPosts = GetUserPosts(user.Id);
-                                var userPostView = GetUserPostView(userPosts, userAccount);
-                                bool isFollowed = requestOwner.Following.Contains(user.Id);
+                        var requestOwner = GetUserByAuthToken(authToken);
+                        var user = GetUserByUsername(name);
+                        var userAccount = GetAccountBySearchToken(user.Id);
+                        var userPosts = GetUserPosts(user.Id);
+                        var userPostView = GetUserPostView(userPosts, userAccount);
+                        bool isFollowed = requestOwner.Following.Contains(user.Id);
 
-                                userProfileModel = GetUserProfileView(userPostView, userAccount, user, isFollowed);
-
-                                var cacheEntryOptions = new MemoryCacheEntryOptions()
-                                    .SetSlidingExpiration(TimeSpan.FromMinutes(30));
-
-                                _cache.Set(cacheKey, userProfileModel, cacheEntryOptions);
-                        }
+                        var userProfileModel = GetUserProfileView(userPostView, userAccount, user, isFollowed);
 
                         return userProfileModel;
                 }
@@ -116,50 +100,40 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                 public List<PostView> GetPosts(User user, int page)
                 {
-                        string cacheKey = $"GetPosts_{page}";
+                        var posts = _blogCollection.Find(post => true)
+                                                   .SortByDescending(post => post.CretaedAtUtc)
+                                                   .Skip((page - 1) * _pageSizeConst)
+                                                   .Limit(_pageSizeConst)
+                                                   .ToList();
 
-                        if (!_cache.TryGetValue(cacheKey, out List<PostView> postViewModels))
-                        {
-                                var posts = _blogCollection.Find(post => true)
-                                                           .SortByDescending(post => post.CretaedAtUtc)
-                                                           .Skip((page - 1) * _pageSizeConst)
-                                                           .Limit(_pageSizeConst)
-                                                           .ToList();
-
-                                postViewModels = posts.AsParallel()
-                                    .Select(post => new PostView
-                                    {
-                                            Id = post.Id.ToString(),
-                                            Text = post.Text,
-                                            ImgUrl = post.ImgUrl,
-                                            CreatedAtUtc = post.CretaedAtUtc,
-                                            UpdatedAtUtc = post.UpdatedAtUtc,
-                                            Account = GetAccountBySearchToken(post.AuthorSearchToken),
-                                            Comments = GetPostComments(user, post),
-                                            Likes = post.Likes.Count(),
-                                            IsLiked = post.Likes.Contains(user.Id),
-                                    }).ToList();
-
-                                var cacheEntryOptions = new MemoryCacheEntryOptions()
-                                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
-
-                                _cache.Set(cacheKey, postViewModels, cacheEntryOptions);
-                        }
+                        var postViewModels = posts.AsParallel()
+                           .Select(post => new PostView
+                           {
+                                   Id = post.Id.ToString(),
+                                   Text = post.Text,
+                                   ImgUrl = post.ImgUrl,
+                                   CreatedAtUtc = post.CretaedAtUtc,
+                                   UpdatedAtUtc = post.UpdatedAtUtc,
+                                   Account = GetAccountBySearchToken(post.AuthorSearchToken),
+                                   Comments = GetPostComments(user, post),
+                                   Likes = post.Likes.Count(),
+                                   IsLiked = post.Likes.Contains(user.Id),
+                           }).ToList();
 
                         return postViewModels;
                 }
 
-                public List<CommantView> GetPostComments(User user,Post post)
+                public List<CommantView> GetPostComments(User user, Post post)
                 {
                         return post.Comments.AsParallel()
                                 .Select(comment => new CommantView
-                        {
-                                Id = comment.Id.ToString(),
-                                Text = comment.Text,
-                                CreatedAtUtc = comment.CreatedAtUtc,
-                                Account = GetAccountBySearchToken(comment.AuthorSearchToken),
+                                {
+                                        Id = comment.Id.ToString(),
+                                        Text = comment.Text,
+                                        CreatedAtUtc = comment.CreatedAtUtc,
+                                        Account = GetAccountBySearchToken(comment.AuthorSearchToken),
                                         Likes = comment.Likes.Count(),
-                                IsLiked = comment.Likes.Contains(user.Id),
+                                        IsLiked = comment.Likes.Contains(user.Id),
                                 }).ToList();
                 }
 
@@ -194,20 +168,32 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         };
                 }
 
-                public Account GetAccountBySearchToken(ObjectId token)
+                public Account GetAccountBySearchToken(ObjectId searchToken)
                 {
-                        var user = GetUserBySearchToken(token);
+                        string cacheKey = $"Account-{searchToken}";
 
-                        if(user == null)
-                                return null!;
-
-                        return new Account()
+                        if (!_cache.TryGetValue(cacheKey, out Account account))
                         {
-                                SearchToken = user!.Id.ToString(),
-                                AvatarUrl = user.AvatarUrl,
-                                Username = user.Name,
-                                IsVerified = user.IsVerified,
-                        };
+                                var user = GetUserBySearchToken(searchToken);
+
+                                if (user == null)
+                                        return null!;
+
+                                account = new Account()
+                                {
+                                        SearchToken = user!.Id.ToString(),
+                                        AvatarUrl = user.AvatarUrl,
+                                        Username = user.Name,
+                                        IsVerified = user.IsVerified,
+                                };
+
+                                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                                    .SetSlidingExpiration(TimeSpan.FromMinutes(30));
+
+                                _cache.Set(cacheKey, account, cacheEntryOptions);
+                        }
+
+                        return account;
                 }
 
                 internal User GetUserByIdDiscord(ulong idDiscord)
