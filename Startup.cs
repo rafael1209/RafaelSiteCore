@@ -12,6 +12,7 @@ using RafaelSiteCore.Interfaces;
 using RafaelSiteCore.Services.GoogleDrive;
 using RafaelSiteCore.Model.GoogleDriveCredentials;
 using Microsoft.Extensions.Caching.Memory;
+using RafaelSiteCore.Services.Logger;
 
 namespace RafaelSiteCore
 {
@@ -24,6 +25,7 @@ namespace RafaelSiteCore
                 public static string? redirectUrl { get; set; }
                 public static string? connectionString { private get; set; }
                 public static string? mongoDbName { get; set; }
+                public static string? discordWebhook {  get; set; }
                 public static string? googleDriveFolderId { get; set; }
                 public static GoogleDriveCredentials? googleDriveCredentials { get; set; }
 
@@ -39,6 +41,7 @@ namespace RafaelSiteCore
                         redirectUrl = configuration.GetValue<string>("RedirectUrl");
                         connectionString = configuration.GetValue<string>("ConnectionStrings:MongoDbConnectionString");
                         mongoDbName = configuration.GetValue<string>("ConnectionStrings:MongoDbName");
+                        discordWebhook = configuration.GetValue<string>("DiscordWebhook");
                         googleDriveFolderId = configuration.GetValue<string>("GoogleDrive:FolderId");
                         googleDriveCredentials = new GoogleDriveCredentials
                         {
@@ -72,21 +75,21 @@ namespace RafaelSiteCore
                                 });
 
                                 options.AddSecurityRequirement(new OpenApiSecurityRequirement
-        {
-            {
-                new OpenApiSecurityScheme
-                {
-                    Name = "Bearer",
-                    In = ParameterLocation.Header,
-                    Reference = new OpenApiReference
-                    {
-                        Id = "Bearer",
-                        Type = ReferenceType.SecurityScheme
-                    }
-                },
-                new List<string>()
-            }
-        });
+                                {
+                                    {
+                                        new OpenApiSecurityScheme
+                                        {
+                                            Name = "Bearer",
+                                            In = ParameterLocation.Header,
+                                            Reference = new OpenApiReference
+                                            {
+                                                Id = "Bearer",
+                                                Type = ReferenceType.SecurityScheme
+                                            }
+                                        },
+                                        new List<string>()
+                                    }
+                                });
                         });
                         services.AddHttpContextAccessor();
                         services.AddSingleton<DiscordApiClient>(sp =>
@@ -102,6 +105,8 @@ namespace RafaelSiteCore
 
                         services.AddSingleton<BlogDbContext>(sp =>
                             new BlogDbContext(connectionString ?? "", mongoDbName ?? "", sp.GetRequiredService<IMemoryCache>()));
+
+                        services.AddSingleton<DiscordAlert>(sp => new DiscordAlert(discordWebhook ?? ""));
                 }
 
 

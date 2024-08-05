@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CSharpDiscordWebhook.NET.Discord;
+using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using RafaelSiteCore.DataWrapper.Blog;
@@ -7,6 +8,7 @@ using RafaelSiteCore.Model.Authorize;
 using RafaelSiteCore.Model.Blog;
 using RafaelSiteCore.Services.Auth;
 using RafaelSiteCore.Services.Blog;
+using RafaelSiteCore.Services.Logger;
 using System.ComponentModel.DataAnnotations;
 
 namespace RafaelSiteCore.Controllers.Blog
@@ -17,24 +19,29 @@ namespace RafaelSiteCore.Controllers.Blog
         {
                 private BlogLogic _blogLogic;
                 private DiscordAuthLogic _authLogic;
+                private DiscordAlert _discordWebhook;
 
-                public BlogController(BlogLogic blogLogic, DiscordAuthLogic discordAuthLogic)
+                public BlogController(BlogLogic blogLogic, DiscordAuthLogic discordAuthLogic, DiscordAlert discordWebhook)
                 {
                         _blogLogic = blogLogic;
 
                         _authLogic = discordAuthLogic;
+
+                        _discordWebhook = discordWebhook;
                 }
 
                 [HttpGet]
                 [AuthMiddleware]
-                public IActionResult GetAllPosts([FromQuery] int page)
+                public async Task<IActionResult> GetAllPostsAsync([FromQuery] int page)
                 {
                         Request.Headers.TryGetValue("Authorization", out var token);
 
                         var user = _authLogic.GetUser(token!);
 
-                        if(page ==0)
-                        page = 1;
+                        await _discordWebhook.TestAsync(HttpContext.Connection.RemoteIpAddress.ToString());
+
+                        if (page ==0)
+                                page = 1;
 
                         return Json(_blogLogic.GetPosts(user, page));
                 }

@@ -13,34 +13,35 @@ namespace RafaelSiteCore.Services.Logger
                         _webhookUrl = webhookUrl;
                 }
 
-                public async Task TestAsync()
+                public async Task TestAsync(string name)
                 {
-                        DiscordWebhook hook = new DiscordWebhook();
-                        hook.Uri = new Uri(_webhookUrl);
+                        try
+                        {
+                                DiscordWebhook hook = new DiscordWebhook
+                                {
+                                        Uri = new Uri("https://discord.com/api/webhooks/1270135141938761891/LGtWnHmC-CcRyMmPve2luGAVHbj-W_kiLIohjdG0YGPJ2JUsZaiaQNaRPfcpSYD6SRLg")
+                                };
 
-                        DiscordMessage message = new DiscordMessage();
-                        message.Content = "Example message, ping @everyone, <@userid>";
-                        message.TTS = true; //read message to everyone on the channel
-                        message.Username = "Webhook username";
-                        message.AvatarUrl = new Uri("https://cdn.discordapp.com/avatars/293977705815343105/6856dc3a82fb70bb931566590f0a24ed.png");
+                                DiscordMessage message = new DiscordMessage
+                                {
+                                        Username = name,
+                                        AvatarUrl = new Uri("https://cdn.discordapp.com/avatars/293977705815343105/6856dc3a82fb70bb931566590f0a24ed.png")
+                                };
 
-                        //embeds
-                        DiscordEmbed embed = new DiscordEmbed();
-                        embed.Title = "Embed title";
-                        embed.Description = "Embed description";
-                        embed.Url = new Uri("Embed Url");
-                        embed.Timestamp = new DiscordTimestamp(DateTime.Now);
-                        embed.Color = new DiscordColor(Color.Red); //alpha will be ignored, you can use any RGB color
-                        embed.Footer = new EmbedFooter() { Text = "Footer Text", IconUrl = new Uri("http://url-of-image") };
-                        embed.Image = new EmbedMedia() { Url = new Uri("Media URL"), Width = 150, Height = 150 }; //valid for thumb and video
-                        embed.Provider = new EmbedProvider() { Name = "Provider Name", Url = new Uri("Provider Url") };
-                        embed.Author = new EmbedAuthor() { Name = "Author Name", Url = new Uri("Author Url"), IconUrl = new Uri("http://url-of-image") };
+                                DiscordEmbed embed = new DiscordEmbed
+                                {
+                                        Title = "Embed title",
+                                        Description = "sam",
+                                };
 
-                        message.Embeds.Add(embed);
+                                message.Embeds.Add(embed);
 
-                        
-
-                        await hook.SendAsync(message);
+                                await hook.SendAsync(message);
+                        }
+                        catch (Exception ex)
+                        {
+                                Console.WriteLine($"An error occurred: {ex.Message}");
+                        }
                 }
         }
 }
