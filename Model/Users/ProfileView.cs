@@ -21,6 +21,6 @@ namespace RafaelSiteCore.Model.Users
 
                 public DateTime CreatedAtUtc { get; set; }
 
-                public List<PostView> Posts { get; set; } = new List<PostView> { };
+                public List<PostDto> Posts { get; set; } = new List<PostDto> { };
         }
 }

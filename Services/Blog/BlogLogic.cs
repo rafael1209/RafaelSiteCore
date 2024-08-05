@@ -31,7 +31,7 @@ namespace RafaelSiteCore.Services.Blog
                         return _dbContext.GetUserProfile(name, authToken);
                 }
 
-                public List<PostView> GetPosts(User user ,int page)
+                public List<PostDto> GetPosts(User user ,int page)
                 {
                         return _dbContext.GetPosts(user, page);
                 }

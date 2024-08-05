@@ -43,10 +43,10 @@ namespace RafaelSiteCore.DataWrapper.Blog
                 }
 
 
-                public List<PostView> GetUserPostView(List<Post> posts, Account account)
+                public List<PostDto> GetUserPostsView(List<Post> posts, Account account)
                 {
                         var userPostView = posts.AsParallel()
-                                .Select(post => new PostView
+                                .Select(post => new PostDto
                                 {
                                         Id = post.Id.ToString(),
                                         Text = post.Text,
@@ -54,21 +54,15 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                         CreatedAtUtc = post.CretaedAtUtc,
                                         UpdatedAtUtc = post.UpdatedAtUtc,
                                         Account = account,
-                                        Comments = post.Comments.AsParallel()
-                                        .Select(comment => new CommantView
-                                        {
-                                                Id = comment.Id.ToString(),
-                                                Text = comment.Text,
-                                                CreatedAtUtc = comment.CreatedAtUtc,
-                                                Account = GetAccountBySearchToken(comment.AuthorSearchToken),
-                                        }).ToList(),
+                                        Comments = post.Comments.Count(),
                                         Likes = post.Likes.Count(),
+
                                 }).ToList();
 
                         return userPostView;
                 }
 
-                public ProfileView GetUserProfileView(List<PostView> userPosts, Account account, User user, bool IsFollowed,bool IsOwner)
+                public ProfileView GetUserProfileView(List<PostDto> userPosts, Account account, User user, bool IsFollowed,bool IsOwner)
                 {
                         var userProfile = new ProfileView()
                         {
@@ -96,19 +90,19 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                         var userPosts = GetUserPosts(user.Id);
 
-                        var userPostView = GetUserPostView(userPosts, userAccount);
+                        var userPostsView = GetUserPostsView(userPosts, userAccount);
 
                         bool isFollowed = requestOwner.Following.Contains(user.Id);
 
                         bool isOwner = requestOwner.Id == user.Id;
 
-                        var userProfileModel = GetUserProfileView(userPostView, userAccount, user, isFollowed, isOwner);
+                        var userProfileModel = GetUserProfileView(userPostsView, userAccount, user, isFollowed, isOwner);
 
                         return userProfileModel;
                 }
 
 
-                public List<PostView> GetPosts(User user, int page)
+                public List<PostDto> GetPosts(User user, int page)
                 {
                         var posts = _blogCollection.Find(post => true)
                                                    .SortByDescending(post => post.CretaedAtUtc)
@@ -117,7 +111,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                                    .ToList();
 
                         var postViewModels = posts.AsParallel()
-                           .Select(post => new PostView
+                           .Select(post => new PostDto
                            {
                                    Id = post.Id.ToString(),
                                    Text = post.Text,
@@ -125,7 +119,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                    CreatedAtUtc = post.CretaedAtUtc,
                                    UpdatedAtUtc = post.UpdatedAtUtc,
                                    Account = GetAccountBySearchToken(post.AuthorSearchToken),
-                                   Comments = GetPostComments(user, post),
+                                   Comments = post.Comments.Count(),
                                    Likes = post.Likes.Count(),
                                    IsLiked = post.Likes.Contains(user.Id),
                            }).ToList();
