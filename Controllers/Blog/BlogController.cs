@@ -95,6 +95,9 @@ namespace RafaelSiteCore.Controllers.Blog
 
                         var user = _authLogic.GetUser(token!);
 
+                        if (user.IsBanned)
+                                return BadRequest("User is banned");
+
                         _blogLogic.AddPostAsync(createBlogRequest.Text, createBlogRequest.File, user);
 
                         return Ok();

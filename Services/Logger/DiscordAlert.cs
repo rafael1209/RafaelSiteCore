@@ -15,17 +15,17 @@ namespace RafaelSiteCore.Services.Logger
 
                 public void InfoLogger(string title,string description)
                 {
-                        SendWebhook("Alert", title, description, Color.Yellow);
+                        SendWebhook("Info", title, description, Color.White);
                 }
 
-                public void ErrorLogger() 
+                public void ErrorLogger(string title, string description)
                 {
-                        
+                        SendWebhook("Error", title, description, Color.Red);
                 }
 
-                public void WarningLogger()
+                public void WarningLogger(string title, string description)
                 {
-
+                        SendWebhook("Warning", title, description, Color.Orange);
                 }
 
                 public void SendWebhook(string name, string title, string description ,Color color)
@@ -47,8 +47,10 @@ namespace RafaelSiteCore.Services.Logger
                                 {
                                         Title = title,
                                         Description = description,
-                                        Color = new DiscordColor(color)
-                                };
+                                        Color = new DiscordColor(color),
+                                        Footer = new EmbedFooter() { Text = "rafaelchasman.ru",IconUrl = new Uri("https://www.rafaelchasman.ru/_nuxt/diagrams-icon.BBdHJODi.png") },
+                                        Timestamp = new DiscordTimestamp(DateTime.UtcNow),
+                                }; 
 
                                 message.Embeds.Add(embed);
 
