@@ -7,6 +7,7 @@ using Microsoft.Extensions.Caching.Memory;
 using System.Linq;
 using System.Xml.Linq;
 using x3rt.DiscordOAuth2.Entities;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace RafaelSiteCore.DataWrapper.Blog
 {
@@ -35,6 +36,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         var posts = _blogCollection
                             .Find(post => post.AuthorSearchToken == id)
                             .SortByDescending(post => post.CretaedAtUtc)
+                            .Limit(_pageSizeConst)
                             .ToList();
 
                         return posts;
@@ -66,11 +68,12 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         return userPostView;
                 }
 
-                public ProfileView GetUserProfileView(List<PostView> userPosts, Account account, User user, bool IsFollowed)
+                public ProfileView GetUserProfileView(List<PostView> userPosts, Account account, User user, bool IsFollowed,bool IsOwner)
                 {
                         var userProfile = new ProfileView()
                         {
                                 Account = account,
+                                IsAuthor = IsOwner,
                                 IsVerified = user.IsVerified,
                                 IsBanned = user.IsBanned,
                                 Followers = user.Followers.Count(),
@@ -86,13 +89,20 @@ namespace RafaelSiteCore.DataWrapper.Blog
                 public ProfileView GetUserProfile(string name, string authToken)
                 {
                         var requestOwner = GetUserByAuthToken(authToken);
+
                         var user = GetUserByUsername(name);
+
                         var userAccount = GetAccountBySearchToken(user.Id);
+
                         var userPosts = GetUserPosts(user.Id);
+
                         var userPostView = GetUserPostView(userPosts, userAccount);
+
                         bool isFollowed = requestOwner.Following.Contains(user.Id);
 
-                        var userProfileModel = GetUserProfileView(userPostView, userAccount, user, isFollowed);
+                        bool isOwner = requestOwner.Id == user.Id;
+
+                        var userProfileModel = GetUserProfileView(userPostView, userAccount, user, isFollowed, isOwner);
 
                         return userProfileModel;
                 }
@@ -172,7 +182,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                 {
                         string cacheKey = $"Account-{searchToken}";
 
-                        if (!_cache.TryGetValue(cacheKey, out Account account))
+                        if (!_cache.TryGetValue(cacheKey, out Account? account))
                         {
                                 var user = GetUserBySearchToken(searchToken);
 
@@ -193,7 +203,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                 _cache.Set(cacheKey, account, cacheEntryOptions);
                         }
 
-                        return account;
+                        return account ?? throw new Exception($"Account is null: {searchToken}");
                 }
 
                 internal User GetUserByIdDiscord(ulong idDiscord)

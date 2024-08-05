@@ -11,6 +11,8 @@ namespace RafaelSiteCore.Model.Users
 
                 public bool IsVerified { get; set; }
 
+                public bool IsAuthor { get; set; }
+
                 public int Followers { get; set; }
 
                 public int Following {  get; set; }
