@@ -38,8 +38,6 @@ namespace RafaelSiteCore.Controllers.Blog
 
                         var user = _authLogic.GetUser(token!);
 
-                        _discordWebhook.InfoLogger("Get Posts",$"User: {user.Name} (<@{user.DiscordId}>)");
-
                         if (page ==0)
                                 page = 1;
 

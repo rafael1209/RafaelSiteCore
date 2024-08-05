@@ -1,4 +1,6 @@
-﻿using CSharpDiscordWebhook.NET.Discord;
+﻿using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
+using CSharpDiscordWebhook.NET.Discord;
+using System;
 using System.Drawing;
 using static MongoDB.Bson.Serialization.Serializers.SerializerHelper;
 
@@ -13,22 +15,22 @@ namespace RafaelSiteCore.Services.Logger
                         _webhookUrl = webhookUrl;
                 }
 
-                public void InfoLogger(string title,string description)
+                public void InfoLogger(string title, string description, string uri)
                 {
-                        SendWebhook("Info", title, description, Color.White);
+                        SendWebhook("Info", title, description, uri, Color.White);
                 }
 
-                public void ErrorLogger(string title, string description)
+                public void ErrorLogger(string title, string description, string uri)
                 {
-                        SendWebhook("Error", title, description, Color.Red);
+                        SendWebhook("Error", title, description, uri, Color.Red);
                 }
 
-                public void WarningLogger(string title, string description)
+                public void WarningLogger(string title, string description, string uri)
                 {
-                        SendWebhook("Warning", title, description, Color.Orange);
+                        SendWebhook("Warning", title, description, uri, Color.Orange);
                 }
 
-                public void SendWebhook(string name, string title, string description ,Color color)
+                public void SendWebhook(string name, string title, string description, string avatarUri, Color color)
                 {
                         try
                         {
@@ -48,9 +50,10 @@ namespace RafaelSiteCore.Services.Logger
                                         Title = title,
                                         Description = description,
                                         Color = new DiscordColor(color),
-                                        Footer = new EmbedFooter() { Text = "rafaelchasman.ru",IconUrl = new Uri("https://www.rafaelchasman.ru/_nuxt/diagrams-icon.BBdHJODi.png") },
+                                        Footer = new EmbedFooter() { Text = "rafaelchasman.ru", IconUrl = new Uri("https://www.rafaelchasman.ru/_nuxt/diagrams-icon.BBdHJODi.png") },
                                         Timestamp = new DiscordTimestamp(DateTime.UtcNow),
-                                }; 
+                                        Thumbnail = new EmbedMedia() { Url = new Uri(avatarUri) }
+                                };
 
                                 message.Embeds.Add(embed);
 
