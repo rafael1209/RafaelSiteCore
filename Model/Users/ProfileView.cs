@@ -9,8 +9,6 @@ namespace RafaelSiteCore.Model.Users
 
                 public bool IsBanned { get; set; }
 
-                public bool IsVerified { get; set; }
-
                 public bool IsAuthor { get; set; }
 
                 public int Followers { get; set; }

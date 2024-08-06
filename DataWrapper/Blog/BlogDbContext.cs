@@ -63,7 +63,6 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         {
                                 Account = account,
                                 IsAuthor = IsOwner,
-                                IsVerified = user.IsVerified,
                                 IsBanned = user.IsBanned,
                                 Followers = user.Followers.Count(),
                                 Following = user.Following.Count(),
