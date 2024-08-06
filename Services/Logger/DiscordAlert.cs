@@ -2,6 +2,7 @@
 using CSharpDiscordWebhook.NET.Discord;
 using System;
 using System.Drawing;
+using System.Xml.Linq;
 using static MongoDB.Bson.Serialization.Serializers.SerializerHelper;
 
 namespace RafaelSiteCore.Services.Logger
@@ -28,6 +29,41 @@ namespace RafaelSiteCore.Services.Logger
                 public void WarningLogger(string title, string description, string uri)
                 {
                         SendWebhook("Warning", title, description, uri, Color.Orange);
+                }
+
+                public void SendNewPostAlert(string uri)
+                {
+                        try
+                        {
+                                DiscordWebhook hook = new DiscordWebhook
+                                {
+                                        Uri = new Uri("https://discord.com/api/webhooks/1270170672647241818/BqxqBKLnlxayzk6kHlGo1wgdk7rjzA2yiVbWUSjC6um8qPZWzBlvJipfhpaz7ZvjKCHy")
+                                };
+
+                                DiscordMessage message = new DiscordMessage
+                                {
+                                        Username = "Alert",
+                                        AvatarUrl = new Uri("https://cdn.discordapp.com/avatars/293977705815343105/6856dc3a82fb70bb931566590f0a24ed.png")
+                                };
+
+                                DiscordEmbed embed = new DiscordEmbed
+                                {
+                                        Title = "New Post!",
+                                        Description = "Иди сука смотри новый пост на сайт!",
+                                        Color = new DiscordColor(Color.AliceBlue),
+                                        Footer = new EmbedFooter() { Text = "rafaelchasman.ru", IconUrl = new Uri("https://www.rafaelchasman.ru/_nuxt/diagrams-icon.BBdHJODi.png") },
+                                        Timestamp = new DiscordTimestamp(DateTime.UtcNow),
+                                        Thumbnail = new EmbedMedia() { Url = new Uri(uri) }
+                                };
+
+                                message.Embeds.Add(embed);
+
+                                hook.SendAsync(message);
+                        }
+                        catch (Exception ex)
+                        {
+                                Console.WriteLine($"An error occurred: {ex.Message}");
+                        }
                 }
 
                 public void SendWebhook(string name, string title, string description, string avatarUri, Color color)

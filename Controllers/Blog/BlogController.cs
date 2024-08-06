@@ -98,6 +98,8 @@ namespace RafaelSiteCore.Controllers.Blog
 
                         _blogLogic.AddPostAsync(createBlogRequest.Text, createBlogRequest.File, user);
 
+                        _discordWebhook.SendNewPostAlert(user.AvatarUrl);
+
                         return Ok();
                 }
 
