@@ -120,12 +120,29 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                    CreatedAtUtc = post.CretaedAtUtc,
                                    UpdatedAtUtc = post.UpdatedAtUtc,
                                    Account = GetAccountBySearchToken(post.AuthorSearchToken),
-                                   Comments = post.Comments.Count,
+                                   Comments = GetCashedCommentsCount(post),
                                    Likes = post.Likes.Count(),
                                    IsLiked = post.Likes.Contains(user.Id),
                            }).ToList();
 
                         return postView;
+                }
+
+                public int GetCashedCommentsCount(Post post)
+                {
+                        string cacheKey = $"CommentsCount-{post.Id}";
+
+                        if (!_cache.TryGetValue(cacheKey, out int commentCount))
+                        {
+                                commentCount = post.Comments.Count;
+
+                                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                                    .SetSlidingExpiration(TimeSpan.FromMinutes(30));
+
+                                _cache.Set(cacheKey, commentCount, cacheEntryOptions);
+                        }
+
+                        return commentCount;
                 }
 
                 public List<CommantView> GetPostComments(User user, Post post)
