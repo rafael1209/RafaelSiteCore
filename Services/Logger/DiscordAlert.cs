@@ -44,7 +44,6 @@ namespace RafaelSiteCore.Services.Logger
 
                                 DiscordMessage message = new DiscordMessage
                                 {
-                                        Content= "||<@940848105526534165>||",
                                         Username = "Alert",
                                         AvatarUrl = new Uri("https://cdn.discordapp.com/avatars/293977705815343105/6856dc3a82fb70bb931566590f0a24ed.png")
                                 };
@@ -52,7 +51,7 @@ namespace RafaelSiteCore.Services.Logger
                                 DiscordEmbed embed = new DiscordEmbed
                                 {
                                         Title = "New Post!",
-                                        Description = "<@940848105526534165>, Иди сука смотри, новый пост на сайте!",
+                                        Description = "Иди сука смотри, новый пост на сайте!",
                                         Color = new DiscordColor(Color.AliceBlue),
                                         Footer = new EmbedFooter() { Text = "rafaelchasman.ru", IconUrl = new Uri("https://www.rafaelchasman.ru/_nuxt/diagrams-icon.BBdHJODi.png") },
                                         Timestamp = new DiscordTimestamp(DateTime.UtcNow),
