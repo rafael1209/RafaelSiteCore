@@ -112,7 +112,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         //var allPostFilteredByCommentsLikeCount = allPost.OrderByDescending(post => post.Comments.Count + post.Likes.Count).ToList();
                         //Todo process allPostFilteredByCommentsLikeCount 
 
-                        var postViewModels = posts.AsParallel()
+                        var postView = posts.AsParallel()
                            .Select(post => new PostDto
                            {
                                    Id = post.Id.ToString(),
@@ -121,30 +121,41 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                    CreatedAtUtc = post.CretaedAtUtc,
                                    UpdatedAtUtc = post.UpdatedAtUtc,
                                    Account = GetAccountBySearchToken(post.AuthorSearchToken),
-                                   Comments = post.Comments.Count(),
+                                   Comments = GetPostComments(user, post).Count,
                                    Likes = post.Likes.Count(),
                                    IsLiked = post.Likes.Contains(user.Id),
                            }).ToList();
 
-                        return postViewModels;
+                        return postView;
                 }
 
                 public List<CommantView> GetPostComments(User user, Post post)
                 {
-                        return post.Comments
-                             .AsParallel()
-                             .OrderBy(comment => comment.CreatedAtUtc)
-                             .Reverse()
-                             .Select(comment => new CommantView
-                             {
-                                     Id = comment.Id.ToString(),
-                                     Text = comment.Text,
-                                     CreatedAtUtc = comment.CreatedAtUtc,
-                                     Account = GetAccountBySearchToken(comment.AuthorSearchToken),
-                                     Likes = comment.Likes.Count(),
-                                     IsLiked = comment.Likes.Contains(user.Id),
-                             })
-                             .ToList();
+                        string cacheKey = $"Comments-{post.Id}";
+
+                        if (!_cache.TryGetValue(cacheKey, out List<CommantView> commentsList))
+                        {
+                                 commentsList = post.Comments
+                                     .AsParallel()
+                                     .OrderBy(comment => comment.CreatedAtUtc)
+                                     .Reverse()
+                                     .Select(comment => new CommantView
+                                     {
+                                             Id = comment.Id.ToString(),
+                                             Text = comment.Text,
+                                             CreatedAtUtc = comment.CreatedAtUtc,
+                                             Account = GetAccountBySearchToken(comment.AuthorSearchToken),
+                                             Likes = comment.Likes.Count(),
+                                             IsLiked = comment.Likes.Contains(user.Id),
+                                     }).ToList();
+
+                                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                                            .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+
+                                _cache.Set(cacheKey, commentsList, cacheEntryOptions);
+                        }
+
+                        return commentsList;
                 }
 
                 public PostView GetPost(User user, ObjectId postId)

@@ -31,8 +31,10 @@ namespace RafaelSiteCore.Services.Logger
                         SendWebhook("Warning", title, description, uri, Color.Orange);
                 }
 
-                public void SendNewPostAlert(string uri)
+                public void SendNewPostAlert()
                 {
+                        List<string> messages = new List<string>();
+                        Random random = new Random();
                         try
                         {
                                 DiscordWebhook hook = new DiscordWebhook
@@ -52,8 +54,7 @@ namespace RafaelSiteCore.Services.Logger
                                         Description = "Иди сука смотри, новый пост на сайте!",
                                         Color = new DiscordColor(Color.AliceBlue),
                                         Footer = new EmbedFooter() { Text = "rafaelchasman.ru", IconUrl = new Uri("https://www.rafaelchasman.ru/_nuxt/diagrams-icon.BBdHJODi.png") },
-                                        Timestamp = new DiscordTimestamp(DateTime.UtcNow),
-                                        Thumbnail = new EmbedMedia() { Url = new Uri(uri) }
+                                        Timestamp = new DiscordTimestamp(DateTime.UtcNow)
                                 };
 
                                 message.Embeds.Add(embed);
