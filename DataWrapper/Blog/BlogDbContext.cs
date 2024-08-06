@@ -38,7 +38,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                 }
 
 
-                public List<PostDto> GetUserPostsView(List<Post> posts, Account account)
+                public List<PostDto> GetUserPostsView(List<Post> posts, Account account,ObjectId ownerId)
                 {
                         var userPostView = posts.AsParallel()
                                 .Select(post => new PostDto
@@ -51,7 +51,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                         Account = account,
                                         Comments = post.Comments.Count(),
                                         Likes = post.Likes.Count(),
-
+                                        IsLiked = post.Likes.Contains(ownerId),
                                 }).ToList();
 
                         return userPostView;
@@ -74,9 +74,9 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         return userProfile;
                 }
 
-                public ProfileView GetUserProfile(string name, string authToken)
+                public ProfileView GetUserProfile(string name, User userOwner)
                 {
-                        var requestOwner = GetUserByAuthToken(authToken);
+                        var requestOwner = GetUserBySearchToken(userOwner.Id);
 
                         var user = GetUserByUsername(name);
 
@@ -84,7 +84,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                         var userPosts = GetUserPosts(user.Id);
 
-                        var userPostsView = GetUserPostsView(userPosts, userAccount);
+                        var userPostsView = GetUserPostsView(userPosts, userAccount,requestOwner.Id);
 
                         bool isFollowed = requestOwner.Following.Contains(user.Id);
 

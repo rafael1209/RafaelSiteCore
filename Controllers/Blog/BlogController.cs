@@ -184,9 +184,18 @@ namespace RafaelSiteCore.Controllers.Blog
                 [AuthMiddleware]
                 public IActionResult GetUserProfile([FromRoute] string name)
                 {
-                        Request.Headers.TryGetValue("Authorization", out var authToken);
+                        Request.Headers.TryGetValue("Authorization", out var token);
 
-                        return Json(_blogLogic.GetUserProfile(name, authToken!));
+                        var user = _authLogic.GetUser(token!);
+
+                        if (user.IsBanned)
+                        {
+                                _discordWebhook.WarningLogger("Banned user", $"User: {user.Name}", user.AvatarUrl);
+
+                                return BadRequest("User is banned");
+                        }
+
+                        return Json(_blogLogic.GetUserProfile(name, user));
                 }
         }
 }
