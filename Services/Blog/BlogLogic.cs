@@ -46,6 +46,11 @@ namespace RafaelSiteCore.Services.Blog
                         _dbContext.FollowUser(user, username);
                 }
 
+                public void RemoveFollow(User user, string username)
+                {
+                        _dbContext.UnFollowUser(user, username);
+                }
+
                 public async Task AddPostAsync(string title, IFormFile file, User user)
                 {
                         string fileUrl = "";

@@ -336,6 +336,13 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         AddObjectIdToUserFollow(me, user);
                 }
 
+                public void UnFollowUser(User me, string name)
+                {
+                        var user = GetUserByUsername(name);
+
+                        RemoveObjectIdToUserFollow(me, user);
+                }
+
                 public void AddObjectIdToUserFollow(User me, User user)
                 {
                         var filter = Builders<User>.Filter.Eq(p => p.Id, user.Id);
@@ -349,6 +356,19 @@ namespace RafaelSiteCore.DataWrapper.Blog
                         _userCollection.UpdateOne(filter, update);
                         _userCollection.UpdateOne(userFilter, userUpdate);
                 }
+
+                public void RemoveObjectIdToUserFollow(User me, User user)
+                {
+                        var filter = Builders<User>.Filter.Eq(p => p.Id, user.Id);
+                        var update = Builders<User>.Update.Pull(p => p.Followers, me.Id);
+
+                        var userFilter = Builders<User>.Filter.Eq(p => p.Id, me.Id);
+                        var userUpdate = Builders<User>.Update.Pull(p => p.Following, user.Id);
+
+                        _userCollection.UpdateOne(filter, update);
+                        _userCollection.UpdateOne(userFilter, userUpdate);
+                }
+
 
                 public CommantView AddUserTableToCommentsAndReturn(User user, string postId, string text)
                 {

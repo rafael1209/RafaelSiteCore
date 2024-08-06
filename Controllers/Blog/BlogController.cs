@@ -79,15 +79,28 @@ namespace RafaelSiteCore.Controllers.Blog
                         return Ok(_blogLogic.GetPost(user, postObjectId));
                 }
 
-                [HttpPost("{username}/follow")]
+                [HttpPut("{username}/follow")]
                 [AuthMiddleware]
-                public IActionResult AddComment([FromRoute] string username)
+                public IActionResult Follow([FromRoute] string username)
                 {
                         Request.Headers.TryGetValue("Authorization", out var token);
 
                         var user = _authLogic.GetUser(token!);
 
                         _blogLogic.AddFollow(user, username);
+
+                        return Ok();
+                }
+
+                [HttpDelete("{username}/follow")]
+                [AuthMiddleware]
+                public IActionResult UnFollow([FromRoute] string username)
+                {
+                        Request.Headers.TryGetValue("Authorization", out var token);
+
+                        var user = _authLogic.GetUser(token!);
+
+                        _blogLogic.RemoveFollow(user, username);
 
                         return Ok();
                 }
