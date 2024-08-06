@@ -121,7 +121,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                    CreatedAtUtc = post.CretaedAtUtc,
                                    UpdatedAtUtc = post.UpdatedAtUtc,
                                    Account = GetAccountBySearchToken(post.AuthorSearchToken),
-                                   Comments = GetPostComments(user, post).Count,
+                                   Comments = post.Comments.Count,
                                    Likes = post.Likes.Count(),
                                    IsLiked = post.Likes.Contains(user.Id),
                            }).ToList();
@@ -131,11 +131,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
 
                 public List<CommantView> GetPostComments(User user, Post post)
                 {
-                        string cacheKey = $"Comments-{post.Id}";
-
-                        if (!_cache.TryGetValue(cacheKey, out List<CommantView> commentsList))
-                        {
-                                 commentsList = post.Comments
+                                 var commentsList = post.Comments
                                      .AsParallel()
                                      .OrderBy(comment => comment.CreatedAtUtc)
                                      .Reverse()
@@ -148,12 +144,6 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                              Likes = comment.Likes.Count(),
                                              IsLiked = comment.Likes.Contains(user.Id),
                                      }).ToList();
-
-                                var cacheEntryOptions = new MemoryCacheEntryOptions()
-                                            .SetSlidingExpiration(TimeSpan.FromMinutes(5));
-
-                                _cache.Set(cacheKey, commentsList, cacheEntryOptions);
-                        }
 
                         return commentsList;
                 }
