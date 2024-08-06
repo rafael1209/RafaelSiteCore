@@ -56,9 +56,11 @@ namespace RafaelSiteCore.Controllers.Blog
                         var user = _authLogic.GetUser(token!);
 
                         if (user.IsBanned)
-                                return BadRequest("User is banned");
+                        {
+                                _discordWebhook.WarningLogger("Banned user", $"User: {user.Name}", user.AvatarUrl);
 
-                        _discordWebhook.WarningLogger("Banned user", $"User: {user.Name}", user.AvatarUrl);
+                                return BadRequest("User is banned");
+                        }
 
                         return Ok(_blogLogic.AddCommentAndReturn(user, postId, request.comment));
                 }
@@ -99,7 +101,11 @@ namespace RafaelSiteCore.Controllers.Blog
                         var user = _authLogic.GetUser(token!);
 
                         if (user.IsBanned)
+                        {
+                                _discordWebhook.WarningLogger("Banned user", $"User: {user.Name}", user.AvatarUrl);
+
                                 return BadRequest("User is banned");
+                        }
 
                         _blogLogic.AddPostAsync(createBlogRequest.Text, createBlogRequest.File, user);
 
