@@ -51,7 +51,7 @@ namespace RafaelSiteCore.Services.Logger
                                 DiscordEmbed embed = new DiscordEmbed
                                 {
                                         Title = "New Post!",
-                                        Description = "Иди сука смотри, новый пост на сайте!",
+                                        Description = "<@940848105526534165>, Иди сука смотри, новый пост на сайте!",
                                         Color = new DiscordColor(Color.AliceBlue),
                                         Footer = new EmbedFooter() { Text = "rafaelchasman.ru", IconUrl = new Uri("https://www.rafaelchasman.ru/_nuxt/diagrams-icon.BBdHJODi.png") },
                                         Timestamp = new DiscordTimestamp(DateTime.UtcNow)
