@@ -5,6 +5,7 @@ using RafaelSiteCore.Middlewere;
 using RafaelSiteCore.Model.Authorize;
 using RafaelSiteCore.Model.Users;
 using RafaelSiteCore.Services.Auth;
+using RafaelSiteCore.Services.Logger;
 
 namespace RafaelSiteCore.Controllers.Auth
 {
@@ -15,12 +16,14 @@ namespace RafaelSiteCore.Controllers.Auth
                 private readonly DiscordApiClient _discordApiClient;
                 private readonly DiscordAuthLogic _discordAuthLogic;
                 private readonly ILogger<AuthorizeController> _logger;
+                private readonly DiscordAlert _discordAlert;
 
-                public AuthorizeController(DiscordApiClient discordApiClient, DiscordAuthLogic discordAuthLogic, ILogger<AuthorizeController> logger)
+                public AuthorizeController(DiscordApiClient discordApiClient, DiscordAuthLogic discordAuthLogic, ILogger<AuthorizeController> logger, DiscordAlert discordAlert)
                 {
                         _discordApiClient = discordApiClient;
                         _discordAuthLogic = discordAuthLogic;
                         _logger = logger;
+                        _discordAlert = discordAlert;
                 }
 
                 [HttpPost("discord")]
@@ -49,6 +52,8 @@ namespace RafaelSiteCore.Controllers.Auth
                                 };
 
                                 _logger.LogInformation("User successfully authenticated: {UserData}", userData);
+
+                                _discordAlert.InfoLogger("User Auth", $"User: {user.Name} (<@{user.DiscordId}>)\n", user.AvatarUrl);
                                 return Json(userData);
                         }
                         catch (Exception ex)

@@ -83,6 +83,8 @@ namespace RafaelSiteCore.DataWrapper.Authorize
 
                         account.AvatarUrl = $"{user.AvatarUrl}";
 
+                        account.IsVerified = user.IsVerified;
+
                         return account;
                 }
         }

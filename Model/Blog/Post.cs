@@ -20,6 +20,6 @@ namespace RafaelSiteCore.Model.Blog
 
                 public List<Comment> Comments { get; set; } = new List<Comment>();
 
-                public List<Account> Likes { get; set; } = new List<Account>();
+                public List<ObjectId> Likes { get; set; } = new List<ObjectId>();
         }
 }

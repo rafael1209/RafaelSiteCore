@@ -6,7 +6,6 @@ namespace RafaelSiteCore.Model.Blog
 {
         public class Comment
         {
-                [BsonId]
                 public ObjectId Id { get; set; }
 
                 public string Text { get; set; } = string.Empty;
@@ -14,5 +13,7 @@ namespace RafaelSiteCore.Model.Blog
                 public DateTime CreatedAtUtc { get; set; }
 
                 public ObjectId AuthorSearchToken { get; set; }
+
+                public List<ObjectId> Likes { get; set; } = new List<ObjectId>();
         }
 }

@@ -6,7 +6,7 @@ namespace RafaelSiteCore.Model.Blog
 {
         public class CreateBlogRequest
         {
-                public required string Text { get; set; }
+                public string Text { get; set; } = string.Empty;
 
                 public IFormFile? File { get; set; }
         }

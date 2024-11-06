@@ -1,13 +1,8 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson;
-using RafaelSiteCore.Model.Users;
-using System;
-using System.Collections.Generic;
-using System.Text.Json.Serialization;
+﻿using RafaelSiteCore.Model.Users;
 
 namespace RafaelSiteCore.Model.Blog
 {
-        public class PostView
+        public class PostDto
         {
                 public string Id { get; set; } = string.Empty;
 
@@ -21,7 +16,7 @@ namespace RafaelSiteCore.Model.Blog
 
                 public Account Account { get; set; } = new Account();
 
-                public List<CommantView> Comments { get; set; } = new List<CommantView>();
+                public int Comments { get; set; }
 
                 public int Likes { get; set; }
 

@@ -61,12 +61,7 @@ namespace RafaelSiteCore.Services.GoogleDrive
 
                 public async Task<string> UploadFile(IFormFile file)
                 {
-                        if (file == null || file.Length == 0)
-                        {
-                                return await Task.FromResult("No file selected.");
-                        }
-
-                        var allowedExtensions = new[] { ".png", ".gif", ".webp", ".jpeg" };
+                        var allowedExtensions = new[] { ".png", ".gif", ".webp", ".jpeg", ".jpg" };
                         var extension = Path.GetExtension(file.FileName).ToLower();
 
                         if (!allowedExtensions.Contains(extension))
@@ -106,11 +101,11 @@ namespace RafaelSiteCore.Services.GoogleDrive
                                 };
                                 await _driveService.Permissions.Create(permission, fileId).ExecuteAsync();
 
-                                return await Task.FromResult($"https://drive.google.com/thumbnail?id={fileId}");
+                                return await Task.FromResult($"https://lh3.googleusercontent.com/d/{fileId}");
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
-                                return await Task.FromResult($"Error: {ex}");
+                                return await Task.FromResult($"Error");
                         }
                 }
         }

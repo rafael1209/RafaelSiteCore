@@ -9,7 +9,7 @@ namespace RafaelSiteCore.Model.Users
 
                 public bool IsBanned { get; set; }
 
-                public bool IsVerified { get; set; }
+                public bool IsAuthor { get; set; }
 
                 public int Followers { get; set; }
 
@@ -19,6 +19,6 @@ namespace RafaelSiteCore.Model.Users
 
                 public DateTime CreatedAtUtc { get; set; }
 
-                public List<PostView> Posts { get; set; } = new List<PostView> { };
+                public List<PostDto> Posts { get; set; } = new List<PostDto> { };
         }
 }
