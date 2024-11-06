@@ -9,8 +9,6 @@ namespace RafaelSiteCore.DataWrapper.Blog
         {
                 private readonly MongoClient _mongoClient;
 
-
-
                 private readonly IMongoDatabase _mongoDatabase;
 
                 private IMongoCollection<Post> _blogCollection;
