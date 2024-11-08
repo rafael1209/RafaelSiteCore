@@ -31,7 +31,7 @@ namespace RafaelSiteCore.Controllers.Blog
                 }
 
                 [HttpGet]
-                [AuthMiddleware]
+                //[AuthMiddleware]
                 public IActionResult GetAllPostsAsync([FromQuery] int page)
                 {
                         Request.Headers.TryGetValue("Authorization", out var token);
@@ -66,7 +66,7 @@ namespace RafaelSiteCore.Controllers.Blog
                 }
 
                 [HttpGet("post/{postId}")]
-                [AuthMiddleware]
+                //[AuthMiddleware]
                 public IActionResult GetPost([FromRoute] string postId)
                 {
                         if (!ObjectId.TryParse(postId, out ObjectId postObjectId))
@@ -194,7 +194,7 @@ namespace RafaelSiteCore.Controllers.Blog
                 }
 
                 [HttpGet("profile/{name}")]
-                [AuthMiddleware]
+                //[AuthMiddleware]
                 public IActionResult GetUserProfile([FromRoute] string name)
                 {
                         Request.Headers.TryGetValue("Authorization", out var token);

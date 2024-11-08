@@ -4,8 +4,6 @@ using RafaelSiteCore.DataWrapper.Blog;
 using RafaelSiteCore.Interfaces;
 using RafaelSiteCore.Model.Blog;
 using RafaelSiteCore.Model.Users;
-using RafaelSiteCore.Services.Auth;
-using RafaelSiteCore.Services.GoogleDrive;
 
 namespace RafaelSiteCore.Services.Blog
 {
