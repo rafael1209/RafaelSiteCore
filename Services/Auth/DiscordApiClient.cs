@@ -6,11 +6,11 @@ namespace RafaelSiteCore.Services.Auth
 {
         public class DiscordApiClient
         {
-                private readonly ulong _clientID;
+                private readonly string _clientID;
                 private readonly string _clientSecret;
                 private readonly string _redirectUrl;
 
-                public DiscordApiClient(ulong clientId, string clientSecret, string redirectUrl)
+                public DiscordApiClient(string clientId, string clientSecret, string redirectUrl)
                 {
                         this._clientID = clientId;
                         this._clientSecret = clientSecret;
@@ -21,7 +21,7 @@ namespace RafaelSiteCore.Services.Auth
                 {
                         User user = new User();
 
-                        DiscordOAuth.Configure(_clientID, _clientSecret);
+                        DiscordOAuth.Configure(ulong.Parse(_clientID), _clientSecret);
 
                         var scopes = new ScopesBuilder(OAuthScope.Identify);
                         var oAuth = new DiscordOAuth(_redirectUrl, scopes);

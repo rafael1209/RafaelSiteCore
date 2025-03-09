@@ -15,7 +15,7 @@ namespace RafaelSiteCore
     {
         private readonly IConfiguration configuration;
 
-                public static ulong? clientId { get; set; }
+                public static string? clientId { get; set; }
                 public static string? clientSecret { get; set; }
                 public static string? redirectUrl { get; set; }
                 public static string? connectionString { private get; set; }
@@ -31,7 +31,7 @@ namespace RafaelSiteCore
                             .AddJsonFile("appsettings.json", optional: true)
                             .Build();
 
-                        clientId = configuration.GetValue<ulong>("ClientId");
+                        clientId = configuration.GetValue<string>("ClientId");
                         clientSecret = configuration.GetValue<string>("ClientSecret");
                         redirectUrl = configuration.GetValue<string>("RedirectUrl");
                         connectionString = configuration.GetValue<string>("MongoDbConnectionString");
@@ -88,7 +88,7 @@ namespace RafaelSiteCore
                         });
                         services.AddHttpContextAccessor();
                         services.AddSingleton<DiscordApiClient>(sp =>
-                            new DiscordApiClient(clientId ?? 0, clientSecret ?? "", redirectUrl ?? ""));
+                            new DiscordApiClient(clientId ?? "", clientSecret ?? "", redirectUrl ?? ""));
                         services.AddSingleton<DiscordAuthLogic>();
                         services.AddSingleton<BlogLogic>();
                         services.AddSingleton<AuthorizeDbContext>(sp =>
