@@ -4,28 +4,17 @@ using x3rt.DiscordOAuth2.Entities.Enums;
 
 namespace RafaelSiteCore.Services.Auth
 {
-        public class DiscordApiClient
+        public class DiscordApiClient(string clientId, string clientSecret, string redirectUrl)
         {
-                private readonly string _clientID;
-                private readonly string _clientSecret;
-                private readonly string _redirectUrl;
-
-                public DiscordApiClient(string clientId, string clientSecret, string redirectUrl)
-                {
-                        this._clientID = clientId;
-                        this._clientSecret = clientSecret;
-                        this._redirectUrl = redirectUrl;
-                }
-
-                internal User GetUserInfo(string code)
+            internal User GetUserInfo(string code)
                 {
                         User user = new User();
 
-                        Console.WriteLine("Client ID: "+_clientID);
-                        DiscordOAuth.Configure(ulong.Parse(_clientID), _clientSecret);
+                        Console.WriteLine("Client ID: "+clientId);
+                        DiscordOAuth.Configure(ulong.Parse(clientId), clientSecret);
 
                         var scopes = new ScopesBuilder(OAuthScope.Identify);
-                        var oAuth = new DiscordOAuth(_redirectUrl, scopes);
+                        var oAuth = new DiscordOAuth(redirectUrl, scopes);
 
                         var token = oAuth.GetTokenAsync(code).Result;
 

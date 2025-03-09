@@ -45,7 +45,7 @@ namespace RafaelSiteCore
                                 PrivateKeyId = configuration.GetValue<string>("PrivateKeyId")!,
                                 PrivateKey = configuration.GetValue<string>("PrivateKey")!,
                                 ClientEmail = configuration.GetValue<string>("ClientEmail")!,
-                                ClientId = configuration.GetValue<string>("ClientId")!,
+                                ClientId = configuration.GetValue<string>("GoogleClientId")!,
                                 AuthUri = configuration.GetValue<string>("AuthUri")!,
                                 TokenUri = configuration.GetValue<string>("TokenUri")!,
                                 AuthProviderX509CertUrl = configuration.GetValue<string>("AuthProviderX509CertUrl")!,
