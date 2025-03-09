@@ -21,6 +21,7 @@ namespace RafaelSiteCore.Services.Auth
                 {
                         User user = new User();
 
+                        Console.WriteLine("Client ID: "+_clientID);
                         DiscordOAuth.Configure(ulong.Parse(_clientID), _clientSecret);
 
                         var scopes = new ScopesBuilder(OAuthScope.Identify);
