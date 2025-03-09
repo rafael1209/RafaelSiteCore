@@ -31,7 +31,7 @@ namespace RafaelSiteCore.Controllers.Blog
         }
 
         [HttpGet]
-        //[AuthMiddleware]
+        [AuthMiddleware]
         public IActionResult GetAllPostsAsync([FromQuery] int page)
         {
             Request.Headers.TryGetValue("Authorization", out var token);

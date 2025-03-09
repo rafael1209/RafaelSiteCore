@@ -107,7 +107,6 @@ namespace RafaelSiteCore.DataWrapper.Blog
             return userProfileModel;
         }
 
-
         public List<PostDto> GetPosts(User user, int page)
         {
             var posts = _blogCollection.Find(post => true)
@@ -115,13 +114,6 @@ namespace RafaelSiteCore.DataWrapper.Blog
                                        .Skip((page - 1) * _pageSizeConst)
                                        .Limit(_pageSizeConst)
                                        .ToList();
-
-            //var allPost = _blogCollection.Find(post => true)
-            //        .SortByDescending(post => post.CretaedAtUtc)
-            //        .ToList();
-
-            //var allPostFilteredByCommentsLikeCount = allPost.OrderByDescending(post => post.Comments.Count + post.Likes.Count).ToList();
-            //Todo process allPostFilteredByCommentsLikeCount 
 
             var postView = posts.AsParallel()
                .Select(post => new PostDto
@@ -132,7 +124,7 @@ namespace RafaelSiteCore.DataWrapper.Blog
                    CreatedAtUtc = post.CretaedAtUtc,
                    UpdatedAtUtc = post.UpdatedAtUtc,
                    Account = GetAccountBySearchToken(post.AuthorSearchToken),
-                   Comments = GetCashedCommentsCount(post),
+                   Comments = post.Comments.Count,
                    Likes = post.Likes.Count(),
                    IsLiked = post.Likes.Contains(user.Id),
                }).ToList();
@@ -140,22 +132,22 @@ namespace RafaelSiteCore.DataWrapper.Blog
             return postView;
         }
 
-        public int GetCashedCommentsCount(Post post)
-        {
-            string cacheKey = $"CommentsCount-{post.Id}";
+        //public int GetCashedCommentsCount(Post post)
+        //{
+        //    string cacheKey = $"CommentsCount-{post.Id}";
 
-            if (!_cache.TryGetValue(cacheKey, out int commentCount))
-            {
-                commentCount = post.Comments.Count;
+        //    if (!_cache.TryGetValue(cacheKey, out int commentCount))
+        //    {
+        //        commentCount = post.Comments.Count;
 
-                var cacheEntryOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(30));
+        //        var cacheEntryOptions = new MemoryCacheEntryOptions()
+        //            .SetSlidingExpiration(TimeSpan.FromMinutes(30));
 
-                _cache.Set(cacheKey, commentCount, cacheEntryOptions);
-            }
+        //        _cache.Set(cacheKey, commentCount, cacheEntryOptions);
+        //    }
 
-            return commentCount;
-        }
+        //    return commentCount;
+        //}
 
         public List<CommantView> GetPostComments(User user, Post post)
         {
