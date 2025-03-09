@@ -34,8 +34,8 @@ namespace RafaelSiteCore
                         clientId = configuration.GetValue<ulong>("ClientId");
                         clientSecret = configuration.GetValue<string>("ClientSecret");
                         redirectUrl = configuration.GetValue<string>("RedirectUrl");
-                        connectionString = configuration.GetValue<string>("ConnectionStrings:MongoDbConnectionString");
-                        mongoDbName = configuration.GetValue<string>("ConnectionStrings:MongoDbName");
+                        connectionString = configuration.GetValue<string>("ConnectionStrings_MongoDbConnectionString");
+                        mongoDbName = configuration.GetValue<string>("MongoDbName");
                         discordWebhook = configuration.GetValue<string>("DiscordWebhook");
                         googleDriveFolderId = configuration.GetValue<string>("GoogleDrive:FolderId");
                         googleDriveCredentials = new GoogleDriveCredentials
