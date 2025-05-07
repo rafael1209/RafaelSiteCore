@@ -3,46 +3,37 @@ using RafaelSiteCore.DataWrapper.Authorize;
 using RafaelSiteCore.Helpers;
 using RafaelSiteCore.Model.Users;
 
-namespace RafaelSiteCore.Services.Auth
+namespace RafaelSiteCore.Services.Auth;
+
+public class DiscordAuthLogic(AuthorizeDbContext mongoDbContext)
 {
-        public class DiscordAuthLogic
-        {
-                private AuthorizeDbContext _mongoDbContext;
+    public User ReturnUserData(User user, string avatarHash)
+    {
+        user = mongoDbContext.IsUserExist(user.DiscordId)
+            ? mongoDbContext.GetUserByIdDiscord(user.DiscordId)
+            : mongoDbContext.AddAndReturnUser(user, GenerateAuthToken(user.DiscordId.ToString()));
 
-                public DiscordAuthLogic(AuthorizeDbContext mongoDbContext)
-                {
-                        _mongoDbContext = mongoDbContext;
-                }
+        if (user.AvatarUrl != avatarHash)
+            mongoDbContext.UpdateUserAvatarHash(user.Id, avatarHash);
 
-                public User ReturnUserData(User user, string avatarHash)
-                {
-                        if (_mongoDbContext.IsUserExist(user.DiscordId))
-                                user = _mongoDbContext.GetUserByIdDiscord(user.DiscordId);
-                        else
-                                user = _mongoDbContext.AddAndReturnUser(user, GenerateAuthToken(user.DiscordId.ToString()));
+        user.AvatarUrl = avatarHash;
 
-                        if (user.AvatarUrl != avatarHash) 
-                                _mongoDbContext.UpdateUserAvatarHash(user.Id, avatarHash);
+        return user;
+    }
 
-                        user.AvatarUrl = avatarHash;
+    public User GetUser(string AuthToken)
+    {
+        return mongoDbContext.GetAuthenticatedUser(AuthToken);
+    }
 
-                        return user;
-                }
+    public string GenerateAuthToken(string id)
+    {
+        var salt = StringHelpers.GenerateRandomSalt();
 
-                public User GetUser(string AuthToken)
-                {
-                        return _mongoDbContext.GetAuthenticatedUser(AuthToken);
-                }
+        var idSalted = id + salt;
 
-                public string GenerateAuthToken(string id)
-                {
-                        string salt = StringHelpers.GenerateRandomSalt();
+        var authToken = StringHelpers.GenerateHash(idSalted);
 
-                        string idSalted = id + salt;
-
-                        string authToken = StringHelpers.GenerateHash(idSalted);
-
-                        return authToken;
-                }
-        }
+        return authToken;
+    }
 }

@@ -36,7 +36,7 @@ namespace RafaelSiteCore.Services.Blog
             }
         }
 
-        public List<PostDto> GetPosts(User user, int page)
+        public List<PostDto> GetPosts(User? user, int page)
         {
             return _dbContext.GetPosts(user, page);
         }

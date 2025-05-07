@@ -1,217 +1,194 @@
-﻿using CSharpDiscordWebhook.NET.Discord;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
-using MongoDB.Driver;
-using RafaelSiteCore.DataWrapper.Blog;
 using RafaelSiteCore.Middlewere;
-using RafaelSiteCore.Model.Authorize;
 using RafaelSiteCore.Model.Blog;
 using RafaelSiteCore.Services.Auth;
 using RafaelSiteCore.Services.Blog;
 using RafaelSiteCore.Services.Logger;
-using System.ComponentModel.DataAnnotations;
 
-namespace RafaelSiteCore.Controllers.Blog
+namespace RafaelSiteCore.Controllers.Blog;
+
+[Route("api/v1/blog")]
+[ApiController]
+public class BlogController(BlogLogic blogLogic, DiscordAuthLogic discordAuthLogic, DiscordAlert discordWebhook)
+    : Controller
 {
-    [Route("api/v1/blog/")]
-    [ApiController]
-    public class BlogController : Controller
+    [HttpGet]
+    public IActionResult GetAllPostsAsync([FromQuery] int page = 1)
     {
-        private BlogLogic _blogLogic;
-        private DiscordAuthLogic _authLogic;
-        private DiscordAlert _discordWebhook;
+        Request.Headers.TryGetValue("Authorization", out var token);
 
-        public BlogController(BlogLogic blogLogic, DiscordAuthLogic discordAuthLogic, DiscordAlert discordWebhook)
+        var user = discordAuthLogic.GetUser(token!);
+
+        return Json(blogLogic.GetPosts(user, page));
+    }
+
+    [HttpPost("{postId}/comment")]
+    [AuthMiddleware]
+    public IActionResult AddComment([FromRoute] string postId, CommentRequest request)
+    {
+        if (string.IsNullOrEmpty(request.comment))
+            return BadRequest("Comment is empty.");
+
+        Request.Headers.TryGetValue("Authorization", out var token);
+
+        var user = discordAuthLogic.GetUser(token!);
+
+        if (user.IsBanned)
         {
-            _blogLogic = blogLogic;
+            discordWebhook.WarningLogger("Banned user", $"User: {user.Name}", user.AvatarUrl);
 
-            _authLogic = discordAuthLogic;
-
-            _discordWebhook = discordWebhook;
+            return BadRequest("User is banned");
         }
 
-        [HttpGet]
-        [AuthMiddleware]
-        public IActionResult GetAllPostsAsync([FromQuery] int page)
+        return Ok(blogLogic.AddCommentAndReturn(user, postId, request.comment));
+    }
+
+    [HttpGet("post/{postId}")]
+    public IActionResult GetPost([FromRoute] string postId)
+    {
+        if (!ObjectId.TryParse(postId, out ObjectId postObjectId))
+            return BadRequest("Invalid PostId format.");
+
+        Request.Headers.TryGetValue("Authorization", out var token);
+
+        var user = discordAuthLogic.GetUser(token!);
+
+        return Ok(blogLogic.GetPost(user, postObjectId));
+    }
+
+    [HttpPut("{username}/follow")]
+    [AuthMiddleware]
+    public IActionResult Follow([FromRoute] string username)
+    {
+        Request.Headers.TryGetValue("Authorization", out var token);
+
+        var user = discordAuthLogic.GetUser(token!);
+
+        blogLogic.AddFollow(user, username);
+
+        return Ok();
+    }
+
+    [HttpDelete("{username}/follow")]
+    [AuthMiddleware]
+    public IActionResult UnFollow([FromRoute] string username)
+    {
+        Request.Headers.TryGetValue("Authorization", out var token);
+
+        var user = discordAuthLogic.GetUser(token!);
+
+        blogLogic.RemoveFollow(user, username);
+
+        return Ok();
+    }
+
+    [HttpPost]
+    [AuthMiddleware]
+    public IActionResult CreatePost(CreateBlogRequest createBlogRequest)
+    {
+        Request.Headers.TryGetValue("Authorization", out var token);
+
+        var user = discordAuthLogic.GetUser(token!);
+
+        if (user.IsBanned)
         {
-            Request.Headers.TryGetValue("Authorization", out var token);
+            discordWebhook.WarningLogger("Banned user", $"User: {user.Name}", user.AvatarUrl);
 
-            var user = _authLogic.GetUser(token!);
-
-            if (page == 0)
-                page = 1;
-
-            return Json(_blogLogic.GetPosts(user, page));
+            return BadRequest("User is banned");
         }
 
-        [HttpPost("{postId}/comment")]
-        [AuthMiddleware]
-        public IActionResult AddComment([FromRoute] string postId, CommentRequest request)
+        blogLogic.AddPostAsync(createBlogRequest.Text, createBlogRequest.File, user);
+
+        discordWebhook.SendNewPostAlert();
+
+        return Ok();
+    }
+
+    [HttpPut("{postId}/like")]
+    [AuthMiddleware]
+    public IActionResult LikePost([FromRoute] string postId)
+    {
+        Request.Headers.TryGetValue("Authorization", out var token);
+
+        if (!ObjectId.TryParse(postId, out ObjectId postObjectId))
+            return BadRequest("Invalid PostId format.");
+
+        var user = discordAuthLogic.GetUser(token!);
+
+        blogLogic.LikePost(user, ObjectId.Parse(postId));
+
+        return Ok();
+    }
+
+    [HttpPut("{postId}/{commentId}/like")]
+    [AuthMiddleware]
+    public IActionResult LikePostComment([FromRoute] string postId, [FromRoute] string commentId)
+    {
+        Request.Headers.TryGetValue("Authorization", out var token);
+
+        if (!ObjectId.TryParse(postId, out ObjectId postObjectId)
+            || !ObjectId.TryParse(commentId, out ObjectId commentObjectId))
+            return BadRequest("Invalid PostId or CommentId format.");
+
+        var user = discordAuthLogic.GetUser(token!);
+
+        blogLogic.LikePostComment(user, postObjectId, commentObjectId);
+
+        return Ok();
+    }
+
+    [HttpDelete("{postId}/{commentId}/like")]
+    [AuthMiddleware]
+    public IActionResult UnLikePostComment([FromRoute] string postId, [FromRoute] string commentId)
+    {
+        Request.Headers.TryGetValue("Authorization", out var token);
+
+        if (!ObjectId.TryParse(postId, out ObjectId postObjectId)
+            || !ObjectId.TryParse(commentId, out ObjectId commentObjectId))
+            return BadRequest("Invalid PostId or CommentId format.");
+
+        var user = discordAuthLogic.GetUser(token!);
+
+        blogLogic.UnLikePostComment(user, postObjectId, commentObjectId);
+
+        return Ok();
+    }
+
+    [HttpDelete("{postId}/like")]
+    [AuthMiddleware]
+    public IActionResult UnlikePost([FromRoute] string postId)
+    {
+        Request.Headers.TryGetValue("Authorization", out var token);
+
+        if (!ObjectId.TryParse(postId, out ObjectId postObjectId))
+            return BadRequest("Invalid PostId format.");
+
+        var user = discordAuthLogic.GetUser(token!);
+
+        blogLogic.UnlikePost(user, ObjectId.Parse(postId));
+
+        return Ok();
+    }
+
+    [HttpGet("profile/{name}")]
+    //[AuthMiddleware]
+    public IActionResult GetUserProfile([FromRoute] string name)
+    {
+        if (Request.Headers.TryGetValue("Authorization", out var token))
         {
-            if (string.IsNullOrEmpty(request.comment))
-                return BadRequest("Comment is empty.");
-
-            Request.Headers.TryGetValue("Authorization", out var token);
-
-            var user = _authLogic.GetUser(token!);
+            var user = discordAuthLogic.GetUser(token);
 
             if (user.IsBanned)
             {
-                _discordWebhook.WarningLogger("Banned user", $"User: {user.Name}", user.AvatarUrl);
+                discordWebhook.WarningLogger("Banned user", $"User: {user.Name}", user.AvatarUrl);
 
                 return BadRequest("User is banned");
             }
 
-            return Ok(_blogLogic.AddCommentAndReturn(user, postId, request.comment));
+            return Json(blogLogic.GetUserProfile(name, user));
         }
 
-        [HttpGet("post/{postId}")]
-        //[AuthMiddleware]
-        public IActionResult GetPost([FromRoute] string postId)
-        {
-            if (!ObjectId.TryParse(postId, out ObjectId postObjectId))
-                return BadRequest("Invalid PostId format.");
-
-            Request.Headers.TryGetValue("Authorization", out var token);
-
-            var user = _authLogic.GetUser(token!);
-
-            return Ok(_blogLogic.GetPost(user, postObjectId));
-        }
-
-        [HttpPut("{username}/follow")]
-        [AuthMiddleware]
-        public IActionResult Follow([FromRoute] string username)
-        {
-            Request.Headers.TryGetValue("Authorization", out var token);
-
-            var user = _authLogic.GetUser(token!);
-
-            _blogLogic.AddFollow(user, username);
-
-            return Ok();
-        }
-
-        [HttpDelete("{username}/follow")]
-        [AuthMiddleware]
-        public IActionResult UnFollow([FromRoute] string username)
-        {
-            Request.Headers.TryGetValue("Authorization", out var token);
-
-            var user = _authLogic.GetUser(token!);
-
-            _blogLogic.RemoveFollow(user, username);
-
-            return Ok();
-        }
-
-        [HttpPost]
-        [AuthMiddleware]
-        public IActionResult CreatePost(CreateBlogRequest createBlogRequest)
-        {
-            Request.Headers.TryGetValue("Authorization", out var token);
-
-            var user = _authLogic.GetUser(token!);
-
-            if (user.IsBanned)
-            {
-                _discordWebhook.WarningLogger("Banned user", $"User: {user.Name}", user.AvatarUrl);
-
-                return BadRequest("User is banned");
-            }
-
-            _blogLogic.AddPostAsync(createBlogRequest.Text, createBlogRequest.File, user);
-
-            _discordWebhook.SendNewPostAlert();
-
-            return Ok();
-        }
-
-        [HttpPut("{postId}/like")]
-        [AuthMiddleware]
-        public IActionResult LikePost([FromRoute] string postId)
-        {
-            Request.Headers.TryGetValue("Authorization", out var token);
-
-            if (!ObjectId.TryParse(postId, out ObjectId postObjectId))
-                return BadRequest("Invalid PostId format.");
-
-            var user = _authLogic.GetUser(token!);
-
-            _blogLogic.LikePost(user, ObjectId.Parse(postId));
-
-            return Ok();
-        }
-
-        [HttpPut("{postId}/{commentId}/like")]
-        [AuthMiddleware]
-        public IActionResult LikePostComment([FromRoute] string postId, [FromRoute] string commentId)
-        {
-            Request.Headers.TryGetValue("Authorization", out var token);
-
-            if (!ObjectId.TryParse(postId, out ObjectId postObjectId)
-                    || !ObjectId.TryParse(commentId, out ObjectId commentObjectId))
-                return BadRequest("Invalid PostId or CommentId format.");
-
-            var user = _authLogic.GetUser(token!);
-
-            _blogLogic.LikePostComment(user, postObjectId, commentObjectId);
-
-            return Ok();
-        }
-
-        [HttpDelete("{postId}/{commentId}/like")]
-        [AuthMiddleware]
-        public IActionResult UnLikePostComment([FromRoute] string postId, [FromRoute] string commentId)
-        {
-            Request.Headers.TryGetValue("Authorization", out var token);
-
-            if (!ObjectId.TryParse(postId, out ObjectId postObjectId)
-                    || !ObjectId.TryParse(commentId, out ObjectId commentObjectId))
-                return BadRequest("Invalid PostId or CommentId format.");
-
-            var user = _authLogic.GetUser(token!);
-
-            _blogLogic.UnLikePostComment(user, postObjectId, commentObjectId);
-
-            return Ok();
-        }
-
-        [HttpDelete("{postId}/like")]
-        [AuthMiddleware]
-        public IActionResult UnlikePost([FromRoute] string postId)
-        {
-            Request.Headers.TryGetValue("Authorization", out var token);
-
-            if (!ObjectId.TryParse(postId, out ObjectId postObjectId))
-                return BadRequest("Invalid PostId format.");
-
-            var user = _authLogic.GetUser(token!);
-
-            _blogLogic.UnlikePost(user, ObjectId.Parse(postId));
-
-            return Ok();
-        }
-
-        [HttpGet("profile/{name}")]
-        //[AuthMiddleware]
-        public IActionResult GetUserProfile([FromRoute] string name)
-        {
-            if (Request.Headers.TryGetValue("Authorization", out var token))
-            {
-                var user = _authLogic.GetUser(token);
-
-                if (user.IsBanned)
-                {
-                    _discordWebhook.WarningLogger("Banned user", $"User: {user.Name}", user.AvatarUrl);
-
-                    return BadRequest("User is banned");
-                }
-
-                return Json(_blogLogic.GetUserProfile(name, user));
-            }
-
-            return Json(_blogLogic.GetUserProfile(name));
-        }
+        return Json(blogLogic.GetUserProfile(name));
     }
 }
